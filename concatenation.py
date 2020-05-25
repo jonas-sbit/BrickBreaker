@@ -81,7 +81,6 @@ class Player:
 
     def __init__(self, score=0, lives=3, current_level=1):
         self.score = score
-        # TODO Leben System evtl Einbauen --> 0 Leben --> zurueck zu Level 1 --> Highscore = Level
         self.lives = lives
         self.current_level = current_level
 
@@ -99,7 +98,6 @@ class Breakout:
         self.yDirection = -1
         self.angle = 80
 
-        # TODO Dynamisch fuer Schwierigkeit
         self.speeds = {
             120:(-10, -3),
             100:(-10, -8),
@@ -118,7 +116,6 @@ class Breakout:
         self.score = 0
 
     def createBlocks(self):
-        # TODO Umbauen fuer Levelsystem
         self.blocks = []
         y = 50
         for __ in range(20):
@@ -169,7 +166,6 @@ class Breakout:
                 self.yDirection = self.direction = -1
                 
     def paddleUpdate(self):
-        # TODO Umbauen auf Einstellbar
         pos = pygame.mouse.get_pos()
         on = 0
         for p in self.paddle:
@@ -187,10 +183,13 @@ class Breakout:
                     mouse_up = True
 
             clock.tick(60)
+            
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()
                     sys.exit()
+                    return
+
             self.screen.fill(BLUE)
             self.paddleUpdate()
             self.ballUpdate()
