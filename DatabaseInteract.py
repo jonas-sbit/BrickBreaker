@@ -1,0 +1,77 @@
+import sqlite3
+
+
+
+class DatabaseInteract:
+
+    def __init__(self):
+        self.connection = sqlite3.connect('brickbreaker.db')
+        self.cursor = self.connection.cursor()
+
+        # Tabelle fuer Settings anlegen
+        createSettings = "CREATE TABLE IF NOT EXISTS settings(setting_id INTEGER PRIMARY KEY, left_button TEXT, right_button TEXT, pause_button TEXT)"
+        self.cursor.execute(createSettings)
+        
+        # Tabelle fuer scores anlegen
+        createHighscores = "CREATE TABLE IF NOT EXISTS highscores(score_id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, score INTEGER, level INTEGER)"
+        self.cursor.execute(createHighscores)
+
+        # Tabelle fuer active games anlegen
+        createActiveGame = "CREATE TABLE IF NOT EXISTS activeGames(game_id INTEGER PRIMARY KEY, score INTEGER, level INTEGER)"
+        self.cursor.execute(createActiveGame)
+
+        # default value fuer settings ueberschreibt nicht
+        self.cursor.execute("INSERT OR IGNORE INTO settings VALUES(1, 'a', 'd', 'p')")
+
+        # default value fuer activeGames ueberschreibt nicht
+        self.cursor.execute("INSERT OR IGNORE INTO activeGames VALUES(1, 0, 0)")
+
+        self.connection.commit()
+
+    def get_settings(self):
+        self.cursor.execute("SELECT * FROM settings WHERE setting_id = 1")
+
+        return self.cursor.fetchone()
+
+    def update_settings(self, left_button, right_button, pause_button):
+        self.cursor.execute(f"UPDATE settings SET left_button = '{left_button}', right_button = '{right_button}', pause_button = '{pause_button}' WHERE setting_id = 1")
+
+        self.connection.commit()
+
+
+    def get_scores(self):
+        self.cursor.execute("SELECT * FROM highscores")
+
+        return self.cursor.fetchall()
+
+    def insert_score(self, name, score, level):
+        self.cursor.execute(f"INSERT INTO highscores (name, score, level) VALUES('{name}', {score}, {level})")
+
+        self.connection.commit()
+
+
+    def delete_score(self, score_id):
+        self.cursor.execute(f"DELETE FROM highscores WHERE score_id = {score_id}")
+
+        self.connection.commit()
+
+
+    def clear_scores(self):
+        self.cursor.execute("DELETE FROM highscores")
+
+        self.connection.commit()
+
+    def get_active_game(self):
+        self.cursor.execute("SELECT * FROM activeGames WHERE game_id = 1")
+
+        return self.cursor.fetchone()
+
+    def update_activ_game(self, score, level):
+        self.cursor.execute(f"UPDATE activeGames SET score = {score}, level = {level} WHERE game_id = 1")
+
+        self.connection.commit()
+
+    def clear_active_game(self):
+        self.cursor.execute("UPDATE activeGames SET score = 0, level = 0 WHERE game_id = 1")
+
+        self.connection.commit()   
