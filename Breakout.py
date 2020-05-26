@@ -1,18 +1,22 @@
 import pygame
 from pygame.locals import *
-from paddle import Paddle
+from GameElements import Paddle, Ball, Brick
+from LevelGenerator import LevelGenerator
+from UIElement import WHITE, BLUE
 import os
 
-BLUE = (106, 159, 181)
-WHITE = (255, 255, 255)
+
 
 class Breakout:
     def __init__(self):
         self.screen = pygame.display.set_mode((800, 600))
         self.blocks = []
+
         paddle = Paddle()
+        ball = Ball()
         self.paddle = paddle.form
-        self.ball = pygame.Rect(300, 490, 5, 5)
+        self.ball = ball.form
+
         self.direction = -1
         self.yDirection = -1
         self.angle = 80
@@ -35,15 +39,16 @@ class Breakout:
         self.score = 0
 
     def createBlocks(self):
-        self.blocks = []
-        y = 50
-        for __ in range(20):
-            x = 50
-            for _ in range(26):
-                block = pygame.Rect(x, y, 25, 10)
-                self.blocks.append(block)
-                x += 27
-            y += 12
+        self.blocks = LevelGenerator().create_level(1)
+        # []
+        # y = 50
+        # for __ in range(20):
+        #     x = 50
+        #     for _ in range(26):
+        #         block = pygame.Rect(x, y, 25, 10)
+        #         self.blocks.append(block)
+        #         x += 27
+        #     y += 12
 
     def ballUpdate(self):
         for _ in range(2):
