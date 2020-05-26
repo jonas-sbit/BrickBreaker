@@ -3,7 +3,7 @@ from enum import Enum
 from pygame.sprite import RenderUpdates
 from Player import Player
 from UIElement import UIElement, BLUE, WHITE
-from Breakout import Breakout
+from Brickbreaker import Brickbreaker
 
 
 class Pages():
@@ -94,7 +94,7 @@ class Pages():
             buttons.draw(screen)
 
             if level == 1:
-                Breakout().main(buttons)
+                Brickbreaker().main(buttons)
 
             pygame.display.flip()
 

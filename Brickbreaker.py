@@ -7,7 +7,7 @@ import os
 
 
 
-class Breakout:
+class Brickbreaker:
     def __init__(self):
         self.screen = pygame.display.set_mode((800, 600))
         self.blocks = []

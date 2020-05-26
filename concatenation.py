@@ -9,7 +9,7 @@ from DatabaseInteract import DatabaseInteract
 from UIElement import UIElement, WHITE, BLUE
 from Player import Player
 from pages import Pages, GameState
-from Breakout import Breakout
+from Brickbreaker import Brickbreaker
 import sys
 
 
