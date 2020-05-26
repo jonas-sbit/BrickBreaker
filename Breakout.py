@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
-import sys
+from paddle import Paddle
+import os
 
 BLUE = (106, 159, 181)
 WHITE = (255, 255, 255)
@@ -9,11 +10,8 @@ class Breakout:
     def __init__(self):
         self.screen = pygame.display.set_mode((800, 600))
         self.blocks = []
-        self.paddle = [[pygame.Rect(300, 500, 20, 10), 120],
-                [pygame.Rect(320, 500, 20, 10),100],
-                [pygame.Rect(340, 500, 20, 10),80],
-                [pygame.Rect(360, 500, 20, 10),45],
-        ]
+        paddle = Paddle()
+        self.paddle = paddle.form
         self.ball = pygame.Rect(300, 490, 5, 5)
         self.direction = -1
         self.yDirection = -1
@@ -94,7 +92,7 @@ class Breakout:
             on += 1
 
     def main(self, buttons):
-        pygame.mouse.set_visible(False)
+        #pygame.mouse.set_visible(False)
         clock = pygame.time.Clock()
         self.createBlocks()
         while True:
@@ -107,9 +105,7 @@ class Breakout:
             
             for event in pygame.event.get():
                 if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-                    return
+                    os._exit(1)
 
             self.screen.fill(BLUE)
             self.paddleUpdate()
@@ -129,9 +125,9 @@ class Breakout:
                         pygame.quit()
                         return
                     
-                    if ui_action.value == 0:
+                    #if ui_action.value == 0:
                         #TODO zuruek zu title screen
-                        title_screen(pygame.display.set_mode((1000, 750)))
+                        #title_screen(pygame.display.set_mode((1000, 750)))
                     
                     return ui_action
 

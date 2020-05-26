@@ -31,15 +31,6 @@ def main():
     game_state = GameState.TITLE
 
     player = Player()
-    dbi = DatabaseInteract()
-
-    dbi.update_settings("f", "h", "u")
-
-    sets = dbi.get_settings()
-    
-    dbi.clear_scores()
-
-    dbi.update_activ_game(2, 2)
 
     while True:
         if game_state == GameState.TITLE:
