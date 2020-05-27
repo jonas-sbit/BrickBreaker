@@ -49,6 +49,13 @@ class Ball:
 
 
 class Brick:
+    brick_state_images = [pygame.image.load("brick_state_images/brick_state_0.png"),
+                          pygame.image.load("brick_state_images/brick_state_1.png"),
+                          pygame.image.load("brick_state_images/brick_state_2.png"),
+                          pygame.image.load("brick_state_images/brick_state_3.png"),
+                          pygame.image.load("brick_state_images/brick_state_4.png"),
+                          pygame.image.load("brick_state_images/brick_state_5.png")]
+
     def __init__(self, coordinates, max_hits):
         """
             description:
@@ -64,7 +71,7 @@ class Brick:
             description:
                 - decrement hits_left
                 -
-        :return:
+        :return: boolean whether hits_left was decremented to 0
         """
         self.hits_left -= 1
         return self.hits_left == 0
@@ -75,4 +82,4 @@ class Brick:
                 - select color/background based on self.hits_left
         :return:
         """
-        pygame.draw.rect(screen, COLORS_BRICKS[self.hits_left - 1], self.rect)
+        screen.blit(self.brick_state_images[self.hits_left - 1], self.rect)
