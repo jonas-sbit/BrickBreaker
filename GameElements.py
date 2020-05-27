@@ -1,22 +1,32 @@
 import pygame
 
-STDRD_SIZE_PADDLE = [[pygame.Rect(300, 500, 20, 10), 120],
-                     [pygame.Rect(320, 500, 20, 10), 100],
-                     [pygame.Rect(340, 500, 20, 10), 80],
-                     [pygame.Rect(360, 500, 20, 10), 45],
-                     ]
+# standard paddle consisting of 12 rectangles with corresponding angle; order left to right
+STD_SIZE_PADDLE = [[pygame.Rect(300, 509, 5, 3), 120],
+                   [pygame.Rect(305, 506, 5, 6), 120],
+                   [pygame.Rect(310, 503, 5, 9), 120],
+                   [pygame.Rect(315, 500, 10, 12), 80],
+                   [pygame.Rect(325, 500, 10, 12), 80],
+                   [pygame.Rect(335, 500, 10, 12), 80],
+                   [pygame.Rect(345, 500, 10, 12), 100],
+                   [pygame.Rect(355, 500, 10, 12), 100],
+                   [pygame.Rect(365, 500, 10, 12), 100],
+                   [pygame.Rect(375, 503, 5, 9), 45],
+                   [pygame.Rect(380, 506, 5, 6), 45],
+                   [pygame.Rect(385, 509, 5, 3), 45]
+                   ]
 
-STNDRD_FORM_BALL = pygame.Rect(300, 490, 5, 5)
+
+STD_FORM_BALL = pygame.Rect(300, 490, 5, 5)
 
 BRICK_WIDTH = 25
 BRICK_HEIGHT = 10
-COLORS_BRICKS = [(255, 153, 153), (255, 0, 0), (153, 0, 0)]
 COLOR_UNBREAKABLE_BRICK = ()
 
 
 class Paddle:
     def __init__(self):
-        self.form = STDRD_SIZE_PADDLE
+        self.hitzones = STD_SIZE_PADDLE
+        self.triangles_view = self.create_triangles()
 
     def add_special(self, special):
         self.special = special
@@ -28,15 +38,26 @@ class Paddle:
         pass
 
     def reset_size(self):
-        self.form = STDRD_SIZE_PADDLE
+        self.hitzones = STD_SIZE_PADDLE
 
     def move(self):
         pass
 
+    def update_triangles(self):
+        self.triangles_view = self.create_triangles()
+
+    def create_triangles(self):
+        return ([self.hitzones[0][0].topleft,
+                 self.hitzones[3][0].topleft,
+                (self.hitzones[3][0].x, self.hitzones[0][0].y)],
+                [self.hitzones[11][0].topright,
+                 self.hitzones[8][0].topright,
+                (self.hitzones[8][0].x + self.hitzones[8][0].width, self.hitzones[11][0].y)])
+
 
 class Ball:
     def __init__(self):
-        self.form = STNDRD_FORM_BALL
+        self.form = STD_FORM_BALL
 
     def add_special(self, special):
         self.special = special
@@ -69,11 +90,11 @@ class Brick:
     def get_hit(self):
         """
             description:
-                - decrement hits_left
-                -
-        :return: boolean whether hits_left was decremented to 0
+                - decrement hits_left if bricks is not unbreakable (i.e. hits_left = -1)
+            :return: boolean whether hits_left was decremented to 0
         """
-        self.hits_left -= 1
+        if self.hits_left > 0:
+            self.hits_left -= 1
         return self.hits_left == 0
 
     def show_brick(self, screen):

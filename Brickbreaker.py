@@ -12,9 +12,8 @@ class Brickbreaker:
         self.screen = pygame.display.set_mode((800, 600))
         self.bricks = []
 
-        paddle = Paddle()
         ball = Ball()
-        self.paddle = paddle.form
+        self.paddle = Paddle()
         self.ball = ball.form
 
         self.direction = -1
@@ -69,9 +68,9 @@ class Brickbreaker:
                 self.ball.y = 1
                 self.yDirection *= -1
             
-            for paddle in self.paddle:
-                if paddle[0].colliderect(self.ball):
-                    self.angle = paddle[1]
+            for paddle_part in self.paddle.hitzones:
+                if paddle_part[0].colliderect(self.ball):
+                    self.angle = paddle_part[1]
                     self.direction = -1
                     self.yDirection = -1
                     break
@@ -88,16 +87,17 @@ class Brickbreaker:
             if self.ball.y > 600:
                 self.createBlocks()
                 self.score = 0
-                self.ball.x = self.paddle[1][0].x
+                self.ball.x = self.paddle.hitzones[1][0].x
                 self.ball.y = 490
                 self.yDirection = self.direction = -1
                 
-    def paddleUpdate(self):
+    def paddle_update(self):
         pos = pygame.mouse.get_pos()
-        on = 0
-        for p in self.paddle:
-            p[0].x = pos[0] + 20 * on
-            on += 1
+        previous_pedal_parts_width_sum = 0
+        for p in self.paddle.hitzones:
+            p[0].x = pos[0] + previous_pedal_parts_width_sum
+            previous_pedal_parts_width_sum += p[0].width
+        self.paddle.update_triangles()
 
     def main(self, buttons):
         #pygame.mouse.set_visible(False)
@@ -116,15 +116,17 @@ class Brickbreaker:
                     os._exit(1)
 
             self.screen.fill(BLUE)
-            self.paddleUpdate()
+            self.paddle_update()
             self.ballUpdate()
 
             for brick in self.bricks:
                 brick.show_brick(self.screen)
-            for paddle in self.paddle:
-                pygame.draw.rect(self.screen, (255,255,255), paddle[0])
-            pygame.draw.rect(self.screen, (255,255,255), self.ball)
-            self.screen.blit(self.font.render(str(self.score), -1, (255,255,255)), (400, 550))
+            for paddle_part in self.paddle.hitzones:
+                pygame.draw.rect(self.screen, WHITE, paddle_part[0])
+            for triangle in self.paddle.triangles_view:
+                pygame.draw.polygon(self.screen, WHITE, triangle)
+            pygame.draw.rect(self.screen, WHITE, self.ball)
+            self.screen.blit(self.font.render(str(self.score), -1, WHITE), (400, 550))
             
             for button in buttons:
                 ui_action = button.update(pygame.mouse.get_pos(), mouse_up)
