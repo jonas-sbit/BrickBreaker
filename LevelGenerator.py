@@ -25,7 +25,7 @@ class LevelGenerator():
         for __ in range(20):
             x = 50
             for _ in range(26):
-                block = pygame.Rect(x, y, 25, 10)
+                block = Brick((x, y), 3)
                 blocks.append(block)
                 x += 27
             y += 12

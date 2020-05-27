@@ -10,7 +10,7 @@ import os
 class Brickbreaker:
     def __init__(self):
         self.screen = pygame.display.set_mode((800, 600))
-        self.blocks = []
+        self.bricks = []
 
         paddle = Paddle()
         ball = Ball()
@@ -39,7 +39,7 @@ class Brickbreaker:
         self.score = 0
 
     def createBlocks(self):
-        self.blocks = LevelGenerator().create_level(1)
+        self.bricks = LevelGenerator().create_level(1)
         # []
         # y = 50
         # for __ in range(20):
@@ -75,13 +75,16 @@ class Brickbreaker:
                     self.direction = -1
                     self.yDirection = -1
                     break
-            check = self.ball.collidelist(self.blocks)
-            if check != -1:
-                block = self.blocks.pop(check)
-                if xMovement:
-                    self.direction *= -1
-                self.yDirection *= -1
-                self.score += 1
+
+            for brick in self.bricks:
+                if brick.rect.colliderect(self.ball):
+                    if brick.get_hit():
+                        self.bricks.remove(brick)
+                    if xMovement:
+                        self.direction *= -1
+                    self.yDirection *= -1
+                    self.score += 1
+
             if self.ball.y > 600:
                 self.createBlocks()
                 self.score = 0
@@ -116,8 +119,8 @@ class Brickbreaker:
             self.paddleUpdate()
             self.ballUpdate()
 
-            for block in self.blocks:
-                pygame.draw.rect(self.screen, (255,255,255), block)
+            for brick in self.bricks:
+                brick.show_brick(self.screen)
             for paddle in self.paddle:
                 pygame.draw.rect(self.screen, (255,255,255), paddle[0])
             pygame.draw.rect(self.screen, (255,255,255), self.ball)
