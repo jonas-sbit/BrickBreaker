@@ -37,6 +37,7 @@ def main():
         if game_state == GameState.NEWGAME:
             player = Player()
             game_state = play_level(screen, player)
+            
 
         if game_state == GameState.NEXT_LEVEL:
             player.current_level += 1
@@ -44,6 +45,9 @@ def main():
 
         if game_state == GameState.HIGHSCORE:
             game_state = highscore_page(screen, player)
+
+        if game_state == GameState.SETTINGS:
+            game_state == settings_page(screen, player)
 
         if game_state == GameState.QUIT:
             pygame.quit()
@@ -59,7 +63,8 @@ def play_level(screen, player):
 def highscore_page(screen, player):
     return Pages().highscore_page(screen, player)
 
-
+def settings_page(screen, player):
+    return Pages().settings_page(screen, player)
 
 
 

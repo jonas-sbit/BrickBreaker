@@ -10,7 +10,7 @@ class Pages():
     
     def title_screen(self, screen):
         start_btn = UIElement(
-            center_position=(500, 300),
+            center_position=(500, 200),
             font_size=30,
             bg_rgb=BLUE,
             text_rgb=WHITE,
@@ -18,23 +18,31 @@ class Pages():
             action=GameState.NEWGAME,
         )
         highscore_btn = UIElement(
-            center_position=(500, 400),
+            center_position=(500, 300),
             font_size=30,
             bg_rgb=BLUE,
             text_rgb=WHITE,
             text="Highscores",
             action=GameState.HIGHSCORE,
         )
+        settings_btn = UIElement(
+            center_position=(500, 400),
+            font_size=30,
+            bg_rgb=BLUE,
+            text_rgb=WHITE,
+            text="Einstellungen",
+            action=GameState.SETTINGS,
+        )
         quit_btn = UIElement(
             center_position=(500, 500),
             font_size=30,
             bg_rgb=BLUE,
             text_rgb=WHITE,
-            text="Quit",
+            text="Beenden",
             action=GameState.QUIT,
         )
 
-        buttons = RenderUpdates(start_btn, quit_btn, highscore_btn)
+        buttons = RenderUpdates(start_btn, quit_btn, settings_btn, highscore_btn)
 
         return self.game_loop(screen, buttons, 0)
 
@@ -62,6 +70,20 @@ class Pages():
         return self.game_loop(screen, buttons, 1)
 
     def highscore_page(self, screen, player):
+        return_btn = UIElement(
+            center_position=(140, 570),
+            font_size=20,
+            bg_rgb=BLUE,
+            text_rgb=WHITE,
+            text="Return to main menu",
+            action=GameState.TITLE,
+        )
+
+        buttons = RenderUpdates(return_btn)
+
+        return self.game_loop(screen, buttons, 0)
+
+    def settings_page(self, screen, player):
         return_btn = UIElement(
             center_position=(140, 570),
             font_size=20,
@@ -104,3 +126,4 @@ class GameState(Enum):
     NEWGAME = 1
     NEXT_LEVEL = 2
     HIGHSCORE = 3
+    SETTINGS = 4
