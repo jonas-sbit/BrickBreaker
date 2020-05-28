@@ -1,8 +1,6 @@
 import pygame
 import pygame.freetype
 from pygame.sprite import Sprite
-from pygame.rect import Rect
-from enum import Enum
 from pygame.sprite import RenderUpdates
 
 BLUE = (106, 159, 181)
@@ -70,3 +68,39 @@ class UIElement(Sprite):
     def draw(self, surface):
         """ Draws element onto a surface """
         surface.blit(self.image, self.rect)
+
+class TextElement(Sprite):
+    def __init__(self, center_position, text, font_size, bg_rgb, text_rgb):
+        """
+        Args:
+            center_position - tuple (x, y)
+            text - string of text to write
+            font_size - int
+            bg_rgb (background colour) - tuple (r, g, b)
+            text_rgb (text colour) - tuple (r, g, b)
+        """
+
+        default_image = create_surface_with_text(
+            text=text, font_size=font_size, text_rgb=text_rgb, bg_rgb=bg_rgb
+        )
+
+        self.images = [default_image]
+
+        self.rects = [
+            default_image.get_rect(center=center_position),
+        ]
+
+        super().__init__()
+
+    @property
+    def image(self):
+        return self.images[0]
+
+    @property
+    def rect(self):
+        return self.rects[0]
+
+    def draw(self, surface):
+        """ Draws element onto a surface """
+        surface.blit(self.image, self.rect)
+

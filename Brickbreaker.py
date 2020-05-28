@@ -103,6 +103,7 @@ class Brickbreaker:
         #pygame.mouse.set_visible(False)
         clock = pygame.time.Clock()
         self.createBlocks()
+        
         while True:
             mouse_up = False
             for event in pygame.event.get():

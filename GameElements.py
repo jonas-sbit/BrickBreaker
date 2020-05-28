@@ -1,4 +1,5 @@
 import pygame
+import os
 
 # standard paddle consisting of 12 rectangles with corresponding angle; order left to right
 STD_SIZE_PADDLE = [[pygame.Rect(300, 509, 5, 3), 120],
@@ -21,6 +22,9 @@ STD_FORM_BALL = pygame.Rect(300, 490, 5, 5)
 BRICK_WIDTH = 25
 BRICK_HEIGHT = 10
 COLOR_UNBREAKABLE_BRICK = ()
+
+CRNT_PATH = os.path.dirname(__file__) # Where your .py file is located
+BSI_path = os.path.join(CRNT_PATH, 'brick_state_images') # The Brick State Images folder path
 
 
 class Paddle:
@@ -70,12 +74,13 @@ class Ball:
 
 
 class Brick:
-    brick_state_images = [pygame.image.load("brick_state_images/brick_state_0.png"),
-                          pygame.image.load("brick_state_images/brick_state_1.png"),
-                          pygame.image.load("brick_state_images/brick_state_2.png"),
-                          pygame.image.load("brick_state_images/brick_state_3.png"),
-                          pygame.image.load("brick_state_images/brick_state_4.png"),
-                          pygame.image.load("brick_state_images/brick_state_5.png")]
+
+    brick_state_images = [pygame.image.load(os.path.join(BSI_path,'brick_state_0.png')),
+                          pygame.image.load(os.path.join(BSI_path,'brick_state_1.png')),
+                          pygame.image.load(os.path.join(BSI_path,'brick_state_2.png')),
+                          pygame.image.load(os.path.join(BSI_path,'brick_state_3.png')),
+                          pygame.image.load(os.path.join(BSI_path,'brick_state_4.png')),
+                          pygame.image.load(os.path.join(BSI_path,'brick_state_5.png'))]
 
     def __init__(self, coordinates, max_hits):
         """
