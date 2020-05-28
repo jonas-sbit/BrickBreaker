@@ -3,7 +3,11 @@ from pygame.locals import *
 from GameElements import Paddle, Ball, Brick
 from LevelGenerator import LevelGenerator
 from UIElement import WHITE, BLUE
+from enum import Enum
 import os
+
+
+
 
 
 
@@ -21,10 +25,10 @@ class Brickbreaker:
         self.angle = 80
 
         self.speeds = {
-            120:(-10, -3),
-            100:(-10, -8),
-            80:(10, -8),
-            45:(10, -3),
+            120:(-5, -1),
+            100:(-5, -3),
+            80:(5, -3),
+            45:(5, -1),
         }
         self.swap = {
             120:45,
@@ -79,10 +83,11 @@ class Brickbreaker:
                 if brick.rect.colliderect(self.ball):
                     if brick.get_hit():
                         self.bricks.remove(brick)
+                        self.score += 1
                     if xMovement:
                         self.direction *= -1
                     self.yDirection *= -1
-                    self.score += 1
+
 
             if self.ball.y > 600:
                 self.createBlocks()
@@ -92,12 +97,7 @@ class Brickbreaker:
                 self.yDirection = self.direction = -1
                 
     def paddle_update(self):
-        pos = pygame.mouse.get_pos()
-        previous_pedal_parts_width_sum = 0
-        for p in self.paddle.hitzones:
-            p[0].x = pos[0] + previous_pedal_parts_width_sum
-            previous_pedal_parts_width_sum += p[0].width
-        self.paddle.update_triangles()
+        pass
 
     def main(self, buttons):
         #pygame.mouse.set_visible(False)
@@ -110,21 +110,28 @@ class Brickbreaker:
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                     mouse_up = True
 
-            clock.tick(60)
+            clock.tick(180)
             
             for event in pygame.event.get():
                 if event.type == QUIT:
                     os._exit(1)
+            keys = pygame.key.get_pressed()
+            if keys[K_d]:
+                self.paddle.move(1)
+            if keys[K_a]:
+                self.paddle.move(-1)
+
+
 
             self.screen.fill(BLUE)
-            self.paddle_update()
+            #self.paddle_update()
             self.ballUpdate()
 
             for brick in self.bricks:
                 brick.show_brick(self.screen)
             for paddle_part in self.paddle.hitzones:
                 pygame.draw.rect(self.screen, WHITE, paddle_part[0])
-            for triangle in self.paddle.triangles_view:
+            for triangle in self.paddle.triangle_views:
                 pygame.draw.polygon(self.screen, WHITE, triangle)
             pygame.draw.rect(self.screen, WHITE, self.ball)
             self.screen.blit(self.font.render(str(self.score), -1, WHITE), (400, 550))

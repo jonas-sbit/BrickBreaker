@@ -16,6 +16,7 @@ STD_SIZE_PADDLE = [[pygame.Rect(300, 509, 5, 3), 120],
                    [pygame.Rect(385, 509, 5, 3), 45]
                    ]
 
+STD_PADDLE_SPEED = 5
 
 STD_FORM_BALL = pygame.Rect(300, 490, 5, 5)
 
@@ -23,14 +24,15 @@ BRICK_WIDTH = 25
 BRICK_HEIGHT = 10
 COLOR_UNBREAKABLE_BRICK = (135, 135, 135)
 
-CRNT_PATH = os.path.dirname(__file__) # Where your .py file is located
-BSI_path = os.path.join(CRNT_PATH, 'brick_state_images') # The Brick State Images folder path
+CRNT_PATH = os.path.dirname(__file__)   # Where your .py file is located
+BSI_path = os.path.join(CRNT_PATH, 'brick_state_images')    # The Brick State Images folder path
 
 
 class Paddle:
     def __init__(self):
         self.hitzones = STD_SIZE_PADDLE
-        self.triangles_view = self.create_triangles()
+        self.triangle_views = self.create_triangles()
+        self.speed = STD_PADDLE_SPEED
 
     def add_special(self, special):
         self.special = special
@@ -44,11 +46,18 @@ class Paddle:
     def reset_size(self):
         self.hitzones = STD_SIZE_PADDLE
 
-    def move(self):
-        pass
+    """
+        description
+            - changes the paddle's part's x-coordinates to change its position on the screen using self.speed
+        :param direction: 1 for right-movement, -1 for left-movement
+    """
+    def move(self, direction):
+        for paddle_part in self.hitzones:
+            paddle_part[0].x += self.speed * direction
+        self.triangle_views = self.create_triangles()
 
     def update_triangles(self):
-        self.triangles_view = self.create_triangles()
+        self.triangle_views = self.create_triangles()
 
     def create_triangles(self):
         return ([self.hitzones[0][0].topleft,
