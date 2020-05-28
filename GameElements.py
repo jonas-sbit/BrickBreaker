@@ -21,7 +21,7 @@ STD_FORM_BALL = pygame.Rect(300, 490, 5, 5)
 
 BRICK_WIDTH = 25
 BRICK_HEIGHT = 10
-COLOR_UNBREAKABLE_BRICK = ()
+COLOR_UNBREAKABLE_BRICK = (105, 105, 105)
 
 CRNT_PATH = os.path.dirname(__file__) # Where your .py file is located
 BSI_path = os.path.join(CRNT_PATH, 'brick_state_images') # The Brick State Images folder path
@@ -108,4 +108,7 @@ class Brick:
                 - select color/background based on self.hits_left
         :return:
         """
+
+        # TODO Color fuer unbreakable brick einbauen
         screen.blit(self.brick_state_images[self.hits_left - 1], self.rect)
+

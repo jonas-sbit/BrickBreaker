@@ -38,7 +38,7 @@ class Brickbreaker:
         self.score = 0
 
     def createBlocks(self):
-        self.bricks = LevelGenerator().create_level(1)
+        self.bricks = LevelGenerator().create_level(4)
         # []
         # y = 50
         # for __ in range(20):

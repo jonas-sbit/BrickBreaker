@@ -59,16 +59,7 @@ class Pages():
             action=GameState.TITLE,
         )
 
-        nextlevel_btn = UIElement(
-            center_position=(400, 400),
-            font_size=30,
-            bg_rgb=BLUE,
-            text_rgb=WHITE,
-            text=f"Next level ({player.current_level + 1})",
-            action=GameState.NEXT_LEVEL,
-        )
-
-        buttons = RenderUpdates(return_btn, nextlevel_btn)
+        buttons = RenderUpdates(return_btn)
 
         return self.game_loop(screen, buttons, 1)
 
