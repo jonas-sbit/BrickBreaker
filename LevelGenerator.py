@@ -245,7 +245,7 @@ class LevelGenerator():
         for __ in range(1):
             x = 239
             for _ in range(12):
-                block = Brick((x, y), 6)
+                block = Brick((x, y), 2)
                 blocks.append(block)
                 x += 27
             y += 12
@@ -282,22 +282,22 @@ class LevelGenerator():
         y+=48
         for __ in range(2):
             x = 77
-            for _ in range(3): #24
+            for _ in range(3): 
                 block = Brick((x, y), -1)
                 blocks.append(block)
                 x += 27
             x+=3*27
-            for _ in range(3): #24
+            for _ in range(3): 
                 block = Brick((x, y), 6)
                 blocks.append(block)
                 x += 27
             x+=6*27
-            for _ in range(3): #24
+            for _ in range(3): 
                 block = Brick((x, y), 6)
                 blocks.append(block)
                 x += 27
             x+=3*27
-            for _ in range(3): #24
+            for _ in range(3): 
                 block = Brick((x, y), 6)
                 blocks.append(block)
                 x += 27

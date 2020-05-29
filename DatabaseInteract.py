@@ -9,7 +9,7 @@ class DatabaseInteract:
         self.cursor = self.connection.cursor()
 
         # Tabelle fuer Settings anlegen
-        createSettings = "CREATE TABLE IF NOT EXISTS settings(setting_id INTEGER PRIMARY KEY, left_button TEXT, right_button TEXT, pause_button TEXT, difficulty INTEGER)"
+        createSettings = "CREATE TABLE IF NOT EXISTS settings(setting_id INTEGER PRIMARY KEY, left_button TEXT, left_value TEXT, right_button TEXT, right_value TEXT, pause_button TEXT, pause_value TEXT, difficulty INTEGER)"
         self.cursor.execute(createSettings)
         
         # Tabelle fuer scores anlegen
@@ -21,7 +21,7 @@ class DatabaseInteract:
         self.cursor.execute(createActiveGame)
 
         # default value fuer settings ueberschreibt nicht
-        self.cursor.execute("INSERT OR IGNORE INTO settings VALUES(1, 'a', 'd', 'p', 4)")
+        self.cursor.execute("INSERT OR IGNORE INTO settings VALUES(1, 'a', '97', 'd', '100', 'p', '112', 4)")
 
         # default value fuer activeGames ueberschreibt nicht
         self.cursor.execute("INSERT OR IGNORE INTO activeGames VALUES(1, 0, 0)")
@@ -34,22 +34,22 @@ class DatabaseInteract:
         return self.cursor.fetchone()
 
     def update_settings(self, left_button, right_button, pause_button, difficulty):
-        self.cursor.execute(f"UPDATE settings SET left_button = '{left_button}', right_button = '{right_button}', pause_button = '{pause_button}', difficulty = {difficulty} WHERE setting_id = 1")
+        self.cursor.execute(f"UPDATE settings SET left_button = '{left_button}',right_button = '{right_button}', pause_button = '{pause_button}', difficulty = {difficulty} WHERE setting_id = 1")
 
         self.connection.commit()
 
-    def update_move_left(self, left_button):
-        self.cursor.execute(f"UPDATE settings SET left_button = '{left_button}' WHERE setting_id = 1")
+    def update_move_left(self, left_button, left_value):
+        self.cursor.execute(f"UPDATE settings SET left_button = '{left_button}', left_value = '{left_value}' WHERE setting_id = 1")
 
         self.connection.commit()
 
-    def update_move_right(self, right_button):
-        self.cursor.execute(f"UPDATE settings SET right_button = '{right_button}' WHERE setting_id = 1")
+    def update_move_right(self, right_button, right_value):
+        self.cursor.execute(f"UPDATE settings SET right_button = '{right_button}', right_value = '{right_value}' WHERE setting_id = 1")
 
         self.connection.commit()
 
-    def update_do_pause(self, pause_button):
-        self.cursor.execute(f"UPDATE settings SET pause_button = '{pause_button}' WHERE setting_id = 1")
+    def update_do_pause(self, pause_button, pause_value):
+        self.cursor.execute(f"UPDATE settings SET pause_button = '{pause_button}', pause_value = '{pause_value}' WHERE setting_id = 1")
 
         self.connection.commit()    
 

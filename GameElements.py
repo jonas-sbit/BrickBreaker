@@ -1,5 +1,7 @@
 import pygame
 import os
+from enum import Enum
+from numpy.random import choice
 
 # standard paddle consisting of 12 rectangles with corresponding angle; order left to right
 STD_SIZE_PADDLE = [[pygame.Rect(300, 509, 5, 3), 120],
@@ -27,6 +29,8 @@ COLOR_UNBREAKABLE_BRICK = (135, 135, 135)
 CRNT_PATH = os.path.dirname(__file__)   # Where your .py file is located
 BSI_path = os.path.join(CRNT_PATH, 'brick_state_images')    # The Brick State Images folder path
 
+SPECIAL_WIDTH = 25
+SPECIAL_HEIGHT = 10
 
 class Paddle:
     def __init__(self):
@@ -118,9 +122,74 @@ class Brick:
         :return:
         """
 
-        # TODO Color fuer unbreakable brick einbauen
         if self.hits_left == -1:
             pygame.draw.rect(screen, COLOR_UNBREAKABLE_BRICK, self.rect)
         else:
             screen.blit(self.brick_state_images[self.hits_left - 1], self.rect)
 
+class Special():
+
+    def __init__(self, start_coordinates):
+        """
+            description:
+                - creates a new object of the special class
+            :param start_coordinates: a tuple containing the x- and y-coordinate of the brick's starting point
+        """
+        self.rect = pygame.Rect(start_coordinates[0], start_coordinates[1], SPECIAL_WIDTH, SPECIAL_HEIGHT)
+
+
+    def show_special(self):
+        """
+            description:
+                - shows the special, has to be called in a loop  
+        """       
+        self.special_type = Random_Special_Chooser()
+
+    def activate_special(self):
+        """
+            description:
+                - activates the special if its 'catched' 
+        """       
+        if self.special_type == SpecialType.Faster:
+            pass
+        elif self.special_type == SpecialType.Bigger_Paddle:
+            pass
+        elif self.special_type == SpecialType.Smaller_Paddle:
+            pass
+        elif self.special_type == SpecialType.Confused_Controls:
+            pass
+        elif self.special_type == SpecialType.Extra_Life:
+            pass
+
+
+class SpecialType(Enum):
+    Faster = 0
+    Slower = 1
+    Bigger_Paddle = 2
+    Smaller_Paddle = 3
+    Confused_Controls = 4
+    Extra_Life = 5
+
+def Random_Special_Chooser():
+    c = choice([
+        SpecialType.Faster,
+        SpecialType.Slower,
+        SpecialType.Bigger_Paddle,
+        SpecialType.Smaller_Paddle,
+        SpecialType.Confused_Controls,
+        SpecialType.Extra_Life],
+        1,
+        [
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.1,
+            0.1,
+        ]
+        )
+    return c[0]
+
+def Random_Show_Special():
+    c = choice([False, True], 1, [0.01, 0.99]) # Hier WSLKT Anpassen falls zu viele / wenige Powerups kommen
+    return c[0]

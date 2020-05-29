@@ -1,0 +1,14 @@
+from enum import Enum
+
+class GameState(Enum):
+    QUIT = -1
+    TITLE = 0
+    NEWGAME = 1
+    NEXT_LEVEL = 2
+    HIGHSCORE = 3
+    SETTINGS = 4
+    SETTINGS_HIGHLITED_MOVE_LEFT = 5
+    SETTINGS_HIGHLITED_MOVE_RIGHT = 6
+    SETTINGS_HIGHLITED_DO_PAUSE = 7
+    SETTINGS_HIGHLITED_DIFFICULTY = 8
+  

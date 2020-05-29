@@ -3,12 +3,9 @@ from pygame.locals import *
 from GameElements import Paddle, Ball, Brick
 from LevelGenerator import LevelGenerator
 from UIElement import WHITE, BLUE
-from enum import Enum
+from DatabaseInteract import DatabaseInteract 
+from GameState import GameState
 import os
-
-
-
-
 
 
 class Brickbreaker:
@@ -104,6 +101,12 @@ class Brickbreaker:
         clock = pygame.time.Clock()
         self.createBlocks()
         
+        dbi = DatabaseInteract()
+        sets = dbi.get_settings()
+
+        key_left = sets[2]
+        key_right = sets[4]
+
         while True:
             mouse_up = False
             for event in pygame.event.get():
@@ -115,13 +118,16 @@ class Brickbreaker:
             for event in pygame.event.get():
                 if event.type == QUIT:
                     os._exit(1)
+
             keys = pygame.key.get_pressed()
-            if keys[K_d]:
-                self.paddle.move(1)
-            if keys[K_a]:
+            if keys[int(key_left)]:
                 self.paddle.move(-1)
-
-
+            if keys[int(key_right)]:
+                self.paddle.move(1)
+            if keys[int(sets[6])]:
+                return GameState.TITLE
+            if keys[pygame.K_ESCAPE]:
+                return GameState.TITLE
 
             self.screen.fill(BLUE)
             #self.paddle_update()
@@ -141,7 +147,7 @@ class Brickbreaker:
                 if ui_action is not None:
                     if ui_action.value == -1:
                         pygame.quit()
-                        return
+                        return 
                     
                     #if ui_action.value == 0:
                         #TODO zuruek zu title screen

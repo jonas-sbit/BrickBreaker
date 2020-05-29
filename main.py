@@ -1,6 +1,8 @@
 import pygame
 from Player import Player
-from pages import Pages, GameState
+from pages import Pages
+from GameState import GameState
+from GameElements import  Special, Random_Show_Special
 
 def main():
     pygame.init()
@@ -11,6 +13,12 @@ def main():
     # Standardmaessig mit Title Seite anfangen
     game_state = GameState.TITLE
     player = Player()
+
+    # TEST JONAS
+    special = Special((100,100))
+    if Random_Show_Special():
+        special.show_special()
+
 
     # Aufrufen der Logik, die die Pages aufruft
     while True:

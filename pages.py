@@ -1,10 +1,12 @@
 import pygame
-from enum import Enum
 from pygame.sprite import RenderUpdates
 from Player import Player
 from UIElement import UIElement, BLUE, WHITE, TextElement
 from DatabaseInteract import DatabaseInteract
 from Brickbreaker import Brickbreaker
+from GameState import GameState
+from HighscorePage import highscore, show_top10
+
 
 MAXIMUM_DIFFICULTY = 4
 MINIMUM_DIFFICULTY = 1
@@ -64,18 +66,29 @@ class Pages():
         return self.game_loop(screen, buttons, 1)
 
     def highscore_page(self, screen, player):
-        return_btn = UIElement(
-            center_position=(140, 570),
-            font_size=20,
-            bg_rgb=BLUE,
-            text_rgb=WHITE,
-            text="Return to main menu",
-            action=GameState.TITLE,
-        )
+        # return_btn = UIElement(
+        #     center_position=(140, 570),
+        #     font_size=20,
+        #     bg_rgb=BLUE,
+        #     text_rgb=WHITE,
+        #     text="Return to main menu",
+        #     action=GameState.TITLE,
+        # )
 
-        buttons = RenderUpdates(return_btn)
+        # buttons = RenderUpdates(return_btn)
 
-        return self.game_loop(screen, buttons, 0)
+        # return self.game_loop(screen, buttons, 0)
+        font = pygame.font.SysFont("Arial", 16)
+
+        my_score = 4
+        show_top10(screen)
+
+        txt_surf = font.render("Ready to continue...", True, WHITE)
+        txt_rect = txt_surf.get_rect(center=(400, 300))
+        screen.blit(txt_surf, txt_rect)
+        pygame.display.flip()
+        return GameState.TITLE
+
 
     def settings_page(self, screen, player):
         # Datenbank zum auslesen der aktuellen Einstellungen
@@ -99,7 +112,7 @@ class Pages():
         )
 
         move_left = UIElement(
-            center_position=(250, 150),
+            center_position=(400, 150),
             font_size=20,
             bg_rgb=BLUE,
             text_rgb=WHITE,
@@ -108,29 +121,29 @@ class Pages():
         ) 
 
         move_right = UIElement(
-            center_position=(250, 200),
+            center_position=(400, 200),
             font_size=20,
             bg_rgb=BLUE,
             text_rgb=WHITE,
-            text=f"Nach Rechts: {sets[2]}",
+            text=f"Nach Rechts: {sets[3]}",
             action=GameState.SETTINGS_HIGHLITED_MOVE_RIGHT,
         )     
 
         do_pause = UIElement(
-            center_position=(250, 250),
+            center_position=(400, 250),
             font_size=20,
             bg_rgb=BLUE,
             text_rgb=WHITE,
-            text=f"Pausenmenü: {sets[3]}",
+            text=f"Pausenmenü: {sets[5]}",
             action=GameState.SETTINGS_HIGHLITED_DO_PAUSE,
         )    
 
         difficulty = UIElement(
-            center_position=(250, 300),
+            center_position=(400, 300),
             font_size=20,
             bg_rgb=BLUE,
             text_rgb=WHITE,
-            text=f"Schwierigkeit: {sets[4]}",
+            text=f"Schwierigkeit: {sets[7]}",
             action=GameState.SETTINGS_HIGHLITED_DIFFICULTY,
         )     
 
@@ -161,7 +174,7 @@ class Pages():
         )
 
         move_left = TextElement(
-            center_position=(250, 150),
+            center_position=(400, 150),
             font_size=font_size_picker("move_left", highlited_btn),
             bg_rgb=BLUE,
             text_rgb=WHITE,
@@ -169,36 +182,36 @@ class Pages():
         ) 
 
         move_right = TextElement(
-            center_position=(250, 200),
+            center_position=(400, 200),
             font_size=font_size_picker("move_right", highlited_btn),
             bg_rgb=BLUE,
             text_rgb=WHITE,
-            text=f"Nach Rechts: {sets[2]}",
+            text=f"Nach Rechts: {sets[3]}",
         )     
 
         do_pause = TextElement(
-            center_position=(250, 250),
+            center_position=(400, 250),
             font_size=font_size_picker("do_pause", highlited_btn),
             bg_rgb=BLUE,
             text_rgb=WHITE,
-            text=f"Pausenmenü: {sets[3]}",
+            text=f"Pausenmenü: {sets[5]}",
         )    
 
         if highlited_btn !=4 :
             difficulty = TextElement(
-                center_position=(250, 300),
+                center_position=(400, 300),
                 font_size=font_size_picker("difficulty", highlited_btn),
                 bg_rgb=BLUE,
                 text_rgb=WHITE,
-                text=f"Schwierigkeit: {sets[4]}",
+                text=f"Schwierigkeit: {sets[7]}",
             )
         else:
             difficulty = TextElement(
-                center_position=(300, 300),
+                center_position=(400, 300),
                 font_size=font_size_picker("difficulty", highlited_btn),
                 bg_rgb=BLUE,
                 text_rgb=WHITE,
-                text=f"Schwierigkeit: {sets[4]} (mit '+' und '-' anpassen)",
+                text=f"Schwierigkeit: {sets[7]} (mit '+' und '-' anpassen max. 4 min. 1)",
             )
 
 
@@ -222,21 +235,21 @@ class Pages():
                         if event.key == pygame.K_ESCAPE:
                             return GameState.SETTINGS                           
                         if level == -1:
-                            if event.unicode != sets[2] and event.unicode != sets[3]:
-                                dbi.update_move_left(event.unicode)
+                            if event.unicode != sets[3] and event.unicode != sets[5]:
+                                dbi.update_move_left(event.unicode, event.key)
                         elif level == -2:
-                            if event.unicode != sets[1] and event.unicode != sets[3]:
-                                dbi.update_move_right(event.unicode)
+                            if event.unicode != sets[1] and event.unicode != sets[5]:
+                                dbi.update_move_right(event.unicode, event.key)
                         elif level == -3:
-                            if event.unicode != sets[1] and event.unicode != sets[2]:
-                                dbi.update_do_pause(event.unicode)
+                            if event.unicode != sets[1] and event.unicode != sets[3]:
+                                dbi.update_do_pause(event.unicode, event.key)
                         elif level == -4:
                             if event.key == 270 or event.key == 93:
-                                if(sets[4] < MAXIMUM_DIFFICULTY):
-                                    dbi.update_difficulty(sets[4] + 1)
+                                if(sets[7] < MAXIMUM_DIFFICULTY):
+                                    dbi.update_difficulty(sets[7] + 1)
                             elif event.key == 47 or event.key == 269:
-                                if(sets[4] > MINIMUM_DIFFICULTY):
-                                    dbi.update_difficulty(sets[4] - 1)
+                                if(sets[7] > MINIMUM_DIFFICULTY):
+                                    dbi.update_difficulty(sets[7] - 1)
 
                         return GameState.SETTINGS
 
@@ -257,7 +270,7 @@ class Pages():
             buttons.draw(screen)
 
             if level == 1:
-                Brickbreaker().main(buttons)
+                return Brickbreaker().main(buttons)
 
             pygame.display.flip()
 
@@ -294,20 +307,7 @@ class Pages():
         if game_state == GameState.QUIT:
             game_state = GameState.QUIT
 
-        return game_state
-
-class GameState(Enum):
-    QUIT = -1
-    TITLE = 0
-    NEWGAME = 1
-    NEXT_LEVEL = 2
-    HIGHSCORE = 3
-    SETTINGS = 4
-    SETTINGS_HIGHLITED_MOVE_LEFT = 5
-    SETTINGS_HIGHLITED_MOVE_RIGHT = 6
-    SETTINGS_HIGHLITED_DO_PAUSE = 7
-    SETTINGS_HIGHLITED_DIFFICULTY = 8
-    
+        return game_state  
 
 def font_size_picker(button_name, input):
     if button_name == "move_left" and input == 1:
