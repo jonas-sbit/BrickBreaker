@@ -21,7 +21,7 @@ DISPLAY_HEIGHT = 600
                    ]"""
 
 # standard paddle consisting of 12 rectangles with corresponding bounce-off vector; order left to right
-# each rect 8 wide and speed =
+# each rect 8 wide, speed = 8 and left edge is multiple of 8 to enable across-the-border-movement (Special)
 STD_SIZE_PADDLE = [[pygame.Rect(320, 508, 8, 4), (-5, -1)],
                    [pygame.Rect(328, 504, 8, 8), (-4, -2)],
                    [pygame.Rect(336, 500, 8, 12), (-3, -3)],
@@ -60,6 +60,14 @@ class Movement(Enum):
 
 class Paddle:
     def __init__(self):
+        """
+        description:
+            - Create a new instance of a Paddle-object.
+            - Initialize the paddle's hitzones with the STD_SIZE_PADDLE.
+            - Initialize self.triangle_views covering the slanted parts of the paddle.
+            - Initialize self.speed with STD_PADDLE_SPEED.
+            - Initialize self.special with None as the paddle starts without any specials.
+        """
         self.hitzones = STD_SIZE_PADDLE.copy()
         self.triangle_views = self.create_triangles()
         self.speed = STD_PADDLE_SPEED
@@ -70,22 +78,57 @@ class Paddle:
 
     def tick(self):
         self.special.time = self.special.time - 1
+        # TODO: remove special if time is decremented to 0;
+        #  if special was ACROSS_BORDERS: check if more on left or right edge of the screen
+        if self.hitzones[0][0].left > (DISPLAY_WIDTH / 2) > self.hitzones[len(self.hitzones) - 1][0].right:
+            self.set_position(self.determine_standard_position())
+
+    def determine_standard_position(self):
+        """
+        description:
+            - Determines whether more parts of the paddle are positioned on the left edge or the right edge
+              of the screen when Special.ACROSS_BORDERS ends.
+            - If equally distributed: position at left edge of screen.
+            - left edge can cause off-screen position
+        :return: left edge to position the pedal in standard mode
+        """
+        counter_right_edge = 0
+        counter_left_edge = 0
+        for paddle_part in self.hitzones:
+            if paddle_part[0].x > DISPLAY_WIDTH / 2:            # positioned at right edge
+                counter_right_edge += 1
+            else:                                               # positioned
+                counter_left_edge += 1
+        if counter_right_edge > counter_left_edge:
+            return self.hitzones[len(self.hitzones)-1][0].left
+        else:
+            return self.hitzones[len(self.hitzones)-1][0].left - 800
 
     def change_size(self):
         pass
 
     def reset_size(self):
-        # TODO: update coordinates
+        """
+        description:
+            - Restore the standard paddle.
+            - Call set_position function with saved left edge of previous position.
+        :return: nothing
+        """
+        left_edge = self.hitzones[0][0].left
         self.hitzones = STD_SIZE_PADDLE.copy()
+        self.set_position(left_edge)
 
     def move(self, direction):
         """
         description
-            - changes the paddle's part's x-coordinates to change its position on the screen using self.speed
+            - Change the paddle's part's x-coordinates to change its position on the screen using self.speed.
+            - Movement is checked so the paddle always remains right at the edge of the screen when leaving it.
+            - If Special.ACROSS_BORDER is active:
+              Change coordinates of parts leaving the screen to appear on the other side of it.
         :param direction: 1 for right-movement, -1 for left-movement
         :return: nothing
         """
-        over_edge = True
+        over_edge = False   # TODO: Special check
         if not over_edge:
             if not (self.hitzones[0][0].left + (self.speed * direction)) > DISPLAY_WIDTH and \
                     not (self.hitzones[len(self.hitzones)-1][0].right + (self.speed * direction)) < 0:
@@ -98,10 +141,23 @@ class Paddle:
                 if direction == 1:                                  # right movement
                     if paddle_part[0].left >= DISPLAY_WIDTH:
                         paddle_part[0].x = 0
-                else:
+                else:                                               # left movement
                     if paddle_part[0].right <= 0:
                         paddle_part[0].x = DISPLAY_WIDTH - paddle_part[0].width
         self.triangle_views = self.create_triangles()
+
+    def set_position(self, left_edge):
+        """
+        description:
+            - Set the position of the paddle by aligning all parts to :param left_edge
+        :param left_edge: new left edge of the pedal
+        :return:
+        """
+        i = 0
+        for paddle_part in self.hitzones:
+            paddle_part[0].x = left_edge + (i * 8)
+            i += 1
+        self.update_triangles()
 
     def update_triangles(self):
         """
@@ -115,8 +171,8 @@ class Paddle:
         """
         description:
             - Calculate the tuples / coordinates to draw the triangles (polygons) visually covering up the rectangles
-              used to build the declining part of the paddle
-        :return: tuple of two lists containing the tuples / coordinates
+              used to build the slanted parts of the paddle
+        :return: tuple of 4 lists containing the tuples / coordinates
         """
         """return ([self.hitzones[0][0].topleft,
                  self.hitzones[2][0].topleft,
@@ -140,7 +196,14 @@ class Paddle:
 
 class Ball:
     def __init__(self, vector: tuple):
-        self.form = STD_FORM_BALL
+        """
+        description:
+            - Create a new instance of a Ball-object.
+            - Initialize rectangle represenation.
+            - Initialize movement vector.
+        :param vector: tuple representing the horizontal and vertical movement directions of the ball.
+        """
+        self.form = STD_FORM_BALL.copy()
         self.vector = vector
 
     def add_special(self, special):
@@ -151,8 +214,9 @@ class Ball:
 
     def get_horizontal_movement(self):
         """
-
-        :return:
+        description:
+            - Get the direction of the movement in horizontal direction based on self.vector.
+        :return: Movement-enum value Movement.LEFT or Movement.RIGHT
         """
         if self.vector[0] > 0:
             return Movement.RIGHT
@@ -161,8 +225,9 @@ class Ball:
 
     def get_vertical_movement(self):
         """
-
-        :return:
+        description:
+            - Get the direction of the movement in horizontal direction based on self.vector.
+        :return: Movement-enum value Movement.DOWN or Movement.UP
         """
         if self.vector[1] > 0:
             return Movement.DOWN
@@ -170,16 +235,37 @@ class Ball:
             return Movement.UP
 
     def move(self):
+        """
+        description:
+            - Move the rectangle self.form by adding vector values to current coordinates.
+        :return: nothing
+        """
         self.form.x += self.vector[0]
         self.form.y += self.vector[1]
 
     def get_previous_position(self):
+        """
+        description:
+            - Get the ball's position in the previous frame
+              by subtracting the vector values from the current coordinates.
+        :return: tuple (x, y) representing the position of the ball in the previous frame.
+        """
         return self.form.x - self.vector[0], self.form.y - self.vector[1]
 
     def collide_horizontal(self):
+        """
+        description:
+            - Simulate a collision with a horizontal edge by reversion self.vector's y-coordinate.
+        :return: nothing
+        """
         self.vector = (self.vector[0], self.vector[1] * -1)
 
     def collide_vertical(self):
+        """
+        description:
+            - Simulate a collision with a vertical edge by reversing self.vector's x-coordinate.
+        :return: nothing
+        """
         self.vector = (self.vector[0] * -1, self.vector[1])
 
 
@@ -203,9 +289,9 @@ class Brick:
 
     def get_hit(self):
         """
-            description:
-                - decrement hits_left if bricks is not unbreakable (i.e. hits_left = -1)
-            :return: boolean whether hits_left was decremented to 0
+        description:
+            - Decrement hits_left if brick is not unbreakable (i.e. hits_left = -1).
+        :return: boolean whether hits_left was decremented to 0, i.e. brick is destroyed
         """
         if self.hits_left > 0:
             self.hits_left -= 1
@@ -213,9 +299,10 @@ class Brick:
 
     def show_brick(self, screen):
         """
-            description:
-                - select color/background based on self.hits_left
-        :return:
+        description:
+            - Select color/background based on self.hits_left.
+        :param screen: the screen to show the brick on.
+        :return: nothing
         """
 
         if self.hits_left == -1:
