@@ -2,13 +2,16 @@ import pygame
 from Player import Player
 from pages import Pages
 from GameState import GameState
-from GameElements import  Special, Random_Show_Special
+from GameElements import Special, Random_Show_Special
+
+DISPLAY_WIDTH = 800
+DISPLAY_HEIGHT = 600
 
 def main():
     pygame.init()
 
     # Groesse fuer das Fenster festlegen
-    screen = pygame.display.set_mode((800, 600))
+    screen = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 
     # Standardmaessig mit Title Seite anfangen
     game_state = GameState.TITLE

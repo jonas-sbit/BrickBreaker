@@ -9,41 +9,30 @@ from DatabaseInteract import DatabaseInteract
 from GameState import GameState
 import os
 
+DISPLAY_WIDTH = 800
+DISPLAY_HEIGHT = 600
+
 class RectSide(Enum):
     TOP = 0
     BOTTOM = 1
     LEFT = 3
     RIGHT = 3
 
+
 class CollisionType(Enum):
     HORIZONTAL = 0
     VERTICAL = 1
 
+
 class Brickbreaker:
     def __init__(self):
-        self.screen = pygame.display.set_mode((800, 600))
+        self.screen = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
         self.bricks = []
 
         self.paddle = Paddle()
         # TODO: Zufallsstartpunkt?
         self.ball = Ball(self.paddle.hitzones[3][1])
 
-        """self.direction = -1
-        self.yDirection = -1
-        self.angle = 80
-
-        self.speeds = {
-            120:(-5, -1),
-            100:(-5, -3),
-            80:(5, -3),
-            45:(5, -1),
-        }
-        self.swap = {
-            120:45,
-            45:120,
-            100:80,
-            80:100,
-        }"""
         pygame.font.init()
         self.font = pygame.font.SysFont("Arial", 25)
         # TODO self.score umbauen auf Player.score
@@ -72,12 +61,12 @@ class Brickbreaker:
             self.ball.y += speed[1] * self.direction * self.yDirection
             xMovement = False"""
         # collision left or right edge
-        if self.ball.form.x <= 0 or self.ball.form.x >= 800:
+        if self.ball.form.x <= 0 or self.ball.form.x >= DISPLAY_WIDTH:
             self.ball.collide_vertical()
             if self.ball.form.x <= 0:
                 self.ball.form.x = 1
             else:
-                self.ball.form.x = 799
+                self.ball.form.x = DISPLAY_WIDTH - 1
         # collision top edge
         if self.ball.form.y <= 0:
             self.ball.form.y = 1
@@ -98,7 +87,7 @@ class Brickbreaker:
             print(len(collision_bricks))
 
         # collision bottom edge --> lost
-        if self.ball.form.y > 600:
+        if self.ball.form.y > DISPLAY_HEIGHT:
             self.create_blocks()
             self.score = 0
             self.ball.form.x = self.paddle.hitzones[3][0].x
@@ -149,7 +138,8 @@ class Brickbreaker:
                 - Determine expected collision type based on the relative position of the 2 bricks.
                 - Determine calculated collision type for 2 bricks.
                 - Perform brick collision with the brick matching the expected collision type.
-                - If none matches: chose one (irrelevant for user experience) to perform the brick collision with.
+                - If none matches: chose one (irrelevant for user experience) to perform the brick collision with using
+                  expected collision type.
         :param collision_bricks: list of Brick-objects hit by the ball
         :return: nothing
         """
