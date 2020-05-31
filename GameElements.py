@@ -6,39 +6,38 @@ from numpy.random import choice
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
 
-# standard paddle consisting of 10 rectangles with corresponding bounce-off vector; order left to right
-"""STD_SIZE_PADDLE = [[pygame.Rect(300, 508, 8, 4), (-5, -1)],
-                   [pygame.Rect(308, 504, 8, 8), (-4, -2)],
-                   [pygame.Rect(316, 500, 10, 12), (-3, -3)],
-                   [pygame.Rect(326, 500, 10, 12), (-2, -4)],
-                   [pygame.Rect(336, 500, 10, 12), (-1, -5)],
-                   [pygame.Rect(346, 500, 10, 12), (1, -5)],
-                   [pygame.Rect(356, 500, 10, 12), (2, -4)],
-                   [pygame.Rect(366, 500, 10, 12), (3, -3)],
-                   [pygame.Rect(376, 504, 8, 8), (4, -2)],
-                   [pygame.Rect(384, 508, 8, 4), (5, -1)]
-                   ]"""
-
-# standard paddle consisting of 12 rectangles with corresponding bounce-off vector; order left to right
+# Paddle Constants
 # each rect 8 wide, speed = 8 and left edge is multiple of 8 to enable across-the-border-movement (Special)
 PADDLE_PART_WIDTH = 8
-STD_SIZE_PADDLE = [[pygame.Rect(320, 508, PADDLE_PART_WIDTH, 4), (-5, -1)],
-                   [pygame.Rect(328, 504, PADDLE_PART_WIDTH, 8), (-4, -2)],
-                   [pygame.Rect(336, 500, PADDLE_PART_WIDTH, 12), (-3, -3)],
-                   [pygame.Rect(344, 500, PADDLE_PART_WIDTH, 12), (-2, -4)],
-                   [pygame.Rect(352, 500, PADDLE_PART_WIDTH, 12), (-2, -4)],
-                   [pygame.Rect(360, 500, PADDLE_PART_WIDTH, 12), (-1, -5)],
-                   [pygame.Rect(368, 500, PADDLE_PART_WIDTH, 12), (1, -5)],
-                   [pygame.Rect(376, 500, PADDLE_PART_WIDTH, 12), (2, -4)],
-                   [pygame.Rect(384, 500, PADDLE_PART_WIDTH, 12), (2, -4)],
-                   [pygame.Rect(392, 500, PADDLE_PART_WIDTH, 12), (3, -3)],
-                   [pygame.Rect(400, 504, PADDLE_PART_WIDTH, 8), (4, -2)],
-                   [pygame.Rect(408, 508, PADDLE_PART_WIDTH, 4), (5, -1)]
+PADDLE_MAX_HEIGHT = 12
+PADDLE_TOP_EDGE = 500
+PADDLE_SLANTED_DIVISORS = (1.5, 3)      # order: inner to outer slanted part
+# standard paddle consisting of 12 rectangles with corresponding bounce-off vector; order left to right
+STD_SIZE_PADDLE = [[pygame.Rect(320, PADDLE_TOP_EDGE + PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[0],
+                                PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[1]), (-5, -1)],
+                   [pygame.Rect(328, PADDLE_TOP_EDGE + PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[1],
+                                PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[0]), (-4, -2)],
+                   [pygame.Rect(336, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (-3, -3)],
+                   [pygame.Rect(344, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (-2, -4)],
+                   [pygame.Rect(352, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (-2, -4)],
+                   [pygame.Rect(360, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (-1, -5)],
+                   [pygame.Rect(368, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (1, -5)],
+                   [pygame.Rect(376, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (2, -4)],
+                   [pygame.Rect(384, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (2, -4)],
+                   [pygame.Rect(392, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (3, -3)],
+                   [pygame.Rect(400, PADDLE_TOP_EDGE + PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[1],
+                                PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[0]), (4, -2)],
+                   [pygame.Rect(408, PADDLE_TOP_EDGE + PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[0],
+                                PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[1]), (5, -1)]
                    ]
+PADDLE_GROWTH_PARTS = [[pygame.Rect(0, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (-1, -5)],
+                       [pygame.Rect(0, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (1, -5)]]
 STD_PADDLE_SPEED = 8
 
+# Ball Constants
 STD_FORM_BALL = pygame.Rect(315, 490, 5, 5)
 
+# Brick Constants
 BRICK_WIDTH = 25
 BRICK_HEIGHT = 10
 COLOR_UNBREAKABLE_BRICK = (135, 135, 135)
@@ -46,6 +45,7 @@ COLOR_UNBREAKABLE_BRICK = (135, 135, 135)
 CRNT_PATH = os.path.dirname(__file__)  # Where your .py file is located
 BSI_path = os.path.join(CRNT_PATH, 'brick_state_images')  # The Brick State Images folder path
 
+# Special Constants
 SPECIAL_WIDTH = 25
 SPECIAL_HEIGHT = 10
 SPECIAL_COLOR = (135, 135, 135)
@@ -54,13 +54,14 @@ SPECIAL_TTL = 10
 
 
 class Movement(Enum):
+    """ Possible horizontal and vertical movement directions """
     UP = 0
     DOWN = 1
     LEFT = 2
     RIGHT = 3
 
 
-class Paddle:   # TODO: bugfix when across border special auslaeuft waehrend teilweise auf jeder seite
+class Paddle:
     def __init__(self):
         """
         description:
@@ -77,22 +78,25 @@ class Paddle:   # TODO: bugfix when across border special auslaeuft waehrend tei
 
     def get_left_edge(self):
         """
-
-        :return:
+        Description:
+            - Return the left edge of the whole paddle representation on screen.
+        :return: left edge of the paddle
         """
         return self.hitzones[0][0].left
 
     def get_right_edge(self):
         """
-
-        :return:
+        Description:
+            - Return the right edge of the whole paddle representation on screen.
+        :return: right edge of the paddle
         """
         return self.hitzones[len(self.hitzones) - 1][0].right
 
     def get_top_edge(self):
         """
-
-        :return:
+        Description:
+            - Return the top edge of the whole paddle representation on screen.
+        :return: top edge of the paddle
         """
         top_edge = self.hitzones[0][0].top
         for paddle_part in self.hitzones:
@@ -102,24 +106,36 @@ class Paddle:   # TODO: bugfix when across border special auslaeuft waehrend tei
 
     def get_bottom_edge(self):
         """
-
-        :return:
+        Description:
+            - Return the bottom edge of the whole paddle representation on screen.
+        :return: bottom edge of the paddle
         """
         return self.hitzones[0][0].bottom
 
     def activate_special(self, special):
+        """
+        description:
+            - Adds the given special to the paddle.
+            - If special.type is changing the paddle's size: Call corresponding method.
+            - Non-size-changing specials are handled in the methods affected by the special.
+        :param special: the special to activate
+        :return: nothing
+        """
         self.special = special
-        # TODO: check type and if size changing --> change size
+        if self.special.special_type == SpecialType.BIGGER_PADDLE:
+            self.grow()
+        elif self.special.special_type == SpecialType.SMALLER_PADDLE:
+            self.shrink()
 
     def remove_special(self):
         """
         description:
-            - Remove the special from the paddle and restore the standard state.
-            -
+            - Remove the special from the paddle and restore the standard paddle state.
         :return: nothing
         """
         if not (self.special is None):
-            if self.special.special_type == SpecialType.BIGGER_PADDLE or self.special.special_type == SpecialType.SMALLER_PADDLE:
+            if self.special.special_type == SpecialType.BIGGER_PADDLE \
+                    or self.special.special_type == SpecialType.SMALLER_PADDLE:
                 self.reset_size()
             elif self.special.special_type == SpecialType.ACROSS_BORDER:
                 if self.get_left_edge() > (DISPLAY_WIDTH / 2) > self.get_right_edge():
@@ -143,19 +159,43 @@ class Paddle:   # TODO: bugfix when across border special auslaeuft waehrend tei
             else:  # positioned
                 counter_left_edge += 1
         if counter_right_edge > counter_left_edge:
-            return self.hitzones[0][0].left
+            return self.get_left_edge()
         else:
-            return self.hitzones[0][0].left - 800
+            return self.get_left_edge() - 800
 
-    def change_size(self):
-        # TODO: implement
-        pass
+    def grow(self):
+        """
+        description:
+            - Increase the paddle's size by adding two new parts to it in the middle.
+            - Align the parts correctly using the left edge of the pedal.
+        :return: nothing
+        """
+        # len(self.hitzones) is always even --> middle addresses element right to the middle
+        current_middle = int(len(self.hitzones) / 2)
+        self.hitzones.insert(current_middle, PADDLE_GROWTH_PARTS[0])
+        self.hitzones.insert(current_middle + 1, PADDLE_GROWTH_PARTS[1])
+        self.set_position(self.get_left_edge())
+
+    def shrink(self):
+        """
+        description:
+            - Decrease the paddle's size by removing the middle four parts.
+            - Align the remaining parts correctly using the left edge of the pedal.
+        :return:
+        """
+        # len(self.hitzones) is always even --> middle addresses element right to the middle
+        current_middle = int(len(self.hitzones) / 2)
+        if current_middle >= 3:     # ensure that paddle consists of enough part (should always be the case)
+            for i in range(current_middle + 1, current_middle - 3, -1):
+                self.hitzones.pop(i)
+            self.set_position(self.get_left_edge())
 
     def reset_size(self):
         """
         description:
             - Restore the standard paddle.
-            - Call set_position function with saved left edge of previous position.
+            - Call set_position function with saved left edge of previous position
+              to ensure paddle at the same position (left aligned).
         :return: nothing
         """
         left_edge = self.hitzones[0][0].left
@@ -168,7 +208,9 @@ class Paddle:   # TODO: bugfix when across border special auslaeuft waehrend tei
             - Change the paddle's part's x-coordinates to change its position on the screen using self.speed.
             - Movement is checked so the paddle always remains right at the edge of the screen when leaving it.
             - If Special.ACROSS_BORDER is active:
-              Change coordinates of parts leaving the screen to appear on the other side of it.
+                - Change coordinates of parts leaving the screen to appear on the other side of it.
+            - If Special.CONFUSED_CONTROLS is active:
+                - Reverse movement direction.
         :param direction: 1 for right-movement, -1 for left-movement
         :return: nothing
         """
@@ -199,9 +241,9 @@ class Paddle:   # TODO: bugfix when across border special auslaeuft waehrend tei
     def set_position(self, left_edge):
         """
         description:
-            - Set the position of the paddle by aligning all parts to :param left_edge
+            - Set the position of the paddle by aligning all parts to the given left edge.
         :param left_edge: new left edge of the pedal
-        :return:
+        :return: nothing
         """
         i = 0
         for paddle_part in self.hitzones:
@@ -232,16 +274,16 @@ class Paddle:   # TODO: bugfix when across border special auslaeuft waehrend tei
                  (self.hitzones[len(self.hitzones) - 3][0].right, self.hitzones[len(self.hitzones) - 1][0].top)])"""
         return ([self.hitzones[0][0].topleft,
                  self.hitzones[0][0].topright,
-                 (self.hitzones[0][0].right, self.hitzones[1][0].top)],
+                (self.hitzones[0][0].right, self.hitzones[1][0].top)],
                 [self.hitzones[1][0].topleft,
                  self.hitzones[1][0].topright,
-                 (self.hitzones[1][0].right, self.hitzones[2][0].top)],
+                (self.hitzones[1][0].right, self.hitzones[2][0].top)],
                 [self.hitzones[len(self.hitzones) - 1][0].topright,
                  self.hitzones[len(self.hitzones) - 1][0].topleft,
-                 (self.hitzones[len(self.hitzones) - 1][0].left, self.hitzones[len(self.hitzones) - 2][0].top)],
+                (self.hitzones[len(self.hitzones) - 1][0].left, self.hitzones[len(self.hitzones) - 2][0].top)],
                 [self.hitzones[len(self.hitzones) - 2][0].topright,
                  self.hitzones[len(self.hitzones) - 2][0].topleft,
-                 (self.hitzones[len(self.hitzones) - 2][0].left, self.hitzones[len(self.hitzones) - 3][0].top)])
+                (self.hitzones[len(self.hitzones) - 2][0].left, self.hitzones[len(self.hitzones) - 3][0].top)])
 
 
 class Ball:
@@ -255,12 +297,6 @@ class Ball:
         """
         self.form = STD_FORM_BALL.copy()
         self.vector = vector
-
-    def add_special(self, special):
-        self.special = special
-
-    def tick(self):
-        self.special.time = self.special.time - 1
 
     def get_horizontal_movement(self):
         """
@@ -379,10 +415,15 @@ class Special:
         :param screen: the screen to draw the special on
         :return:
         """
-        # TODO: color based on negative positive neutral
+        # TODO: color based on negative positive neutral -> in konstanten festlegen und per if ... in ... entscheiden
         pygame.draw.rect(screen, SPECIAL_COLOR, self.rect)
 
     def fall(self):
+        """
+        description:
+            - move the special's rectangle representation downwards using SPECIAL_FALL_SPEED
+        :return:
+        """
         self.rect.y += SPECIAL_FALL_SPEED
 
     def is_paddle_special(self):
@@ -391,7 +432,7 @@ class Special:
             - Checks whether the Special is a special changing the paddle's behaviour.
         :return: boolean whether the special changes the paddle's behaviour or not
         """
-        paddle_specials = (2, 3, 4, 5)
+        paddle_specials = (2, 3, 4, 5)  #TODO: in Konstante (in diesem file)
         if self.special_type.value in paddle_specials:
             return True
         else:
@@ -418,6 +459,7 @@ class Special:
 
 
 class SpecialType(Enum):
+    """ Different specials that can occur during the game. """
     FASTER = 0
     SLOWER = 1
     BIGGER_PADDLE = 2
@@ -430,10 +472,10 @@ class SpecialType(Enum):
 def choose_random_special():
     """
     description:
-        -
-    :return:
+        - Choose a random special type from all possible types with defined probabilities.
+    :return: randomly selected SpecialType-enum value
     """
-    c = choice([
+    c = choice([    # TODO: TODO: in Konstante (in diesem file)
         SpecialType.FASTER,
         SpecialType.SLOWER,
         SpecialType.BIGGER_PADDLE,
@@ -442,14 +484,14 @@ def choose_random_special():
         SpecialType.ACROSS_BORDER,
         SpecialType.BONUS_LIFE],
         1,
-        p=[
+        p=[ # TODO: in Konstante (in diesem file)
             0.15,
             0.15,
             0.15,
             0.15,
             0.15,
             0.15,
-            0.1,
+            0.1
         ]
     )
     return c[0]
@@ -458,8 +500,8 @@ def choose_random_special():
 def to_drop_special():
     """
     description:
-        -
-    :return:
+        - Decides whether to drop a special after a brick was destroyed using defined probabilities.
+    :return: Boolean whether to drop or not to drop a special
     """
-    c = choice([False, True], 1, p=[0.85, 0.15])  # Hier WSLKT Anpassen falls zu viele / wenige Powerups kommen
+    c = choice([False, True], 1, p=[0.8, 0.2])  # Hier WSLKT Anpassen falls zu viele / wenige Powerups kommen TODO: in Konstante (in diesem file)
     return c[0]
