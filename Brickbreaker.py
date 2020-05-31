@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
 from GameElements import Paddle, Ball, Brick, Special, SpecialType, to_drop_special, choose_random_special
+from Player import Player
 from LevelGenerator import LevelGenerator
 from UIElement import WHITE, BLUE
 from GameElements import Movement
@@ -33,24 +34,34 @@ class Brickbreaker:
         self.screen = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
         self.bricks = []
         self.paddle = Paddle()
-        # TODO: Winkel beim start, ball in mitte positionieren
-        self.ball = Ball(self.paddle.hitzones[3][1])
+        self.ball = Ball()
         self.present_specials = []
         self.active_special = None
 
         pygame.font.init()
         self.font = pygame.font.SysFont("Arial", 25)
-        # TODO self.score umbauen auf Player.score
-        self.score = 0
+        # TODO: mit schwierigkeitsgrad startleben bestimmen, ggf. stand laden
+        self.player = Player()
 
-    def create_blocks(self, level):
+    def start_game(self):
+        self.create_blocks()
+        # TODO: paddle zu default position (mittig) positionieren
+        self.reset_ball()
+
+    def reset_ball(self):
+        # TODO: Winkel beim start, ball in mitte positionieren
+        self.ball.form.x = self.paddle.hitzones[3][0].x
+        self.ball.form.y = 490
+        self.ball.vector = self.paddle.hitzones[3][1]
+
+    def create_blocks(self):
         """
         description:
             - Create the bricks for the given level using the LevelGenerator-Class
         :param level: number of the level to create
         :return: nothing
         """
-        self.bricks = LevelGenerator().create_level(1) # TODO: anpassen
+        self.bricks = LevelGenerator().create_level(self.player.current_level) # TODO: anpassen
 
     def check_ball_collisions(self):
         """
@@ -92,11 +103,13 @@ class Brickbreaker:
 
         # collision bottom edge --> lost
         if self.ball.form.y > DISPLAY_HEIGHT:
-            self.create_blocks()
-            self.score = 0
-            self.ball.form.x = self.paddle.hitzones[3][0].x
-            self.ball.form.y = 490
-            self.ball.vector = self.paddle.hitzones[3][1]
+            self.player.lives -= 1
+            if self.player.lives == 0:
+                # TODO: save score
+                self.player.score = 0
+                self.player.current_level = 1
+                self.create_blocks()
+            self.reset_ball()
 
     def check_previously_horizontally_outside(self, brick_rect, horizontal_movement):
         """
@@ -213,7 +226,7 @@ class Brickbreaker:
 
         if brick_hit.get_hit():
             self.bricks.remove(brick_hit)
-            self.score += 1
+            self.player.score += 1
             if to_drop_special():
                 self.present_specials.append(Special(brick_hit.rect.topleft, choose_random_special()))
 
@@ -256,7 +269,7 @@ class Brickbreaker:
         :return: nothing
         """
         if special.special_type == SpecialType.BONUS_LIFE:
-            pass # TODO: add life to player lifes
+            self.player.lives += 1
         elif special.special_type == SpecialType.FASTER:
             self.clock_speed = DEFAULT_CLOCK_SPEED * CLOCK_SPEED_CHANGE_FACTOR
         elif special.special_type == SpecialType.SLOWER:
@@ -279,7 +292,7 @@ class Brickbreaker:
     def main(self, buttons):
         # pygame.mouse.set_visible(False)
         clock = pygame.time.Clock()
-        self.create_blocks()
+        self.start_game()
         
         dbi = DatabaseInteract()
         sets = dbi.get_settings()
@@ -328,7 +341,7 @@ class Brickbreaker:
             for triangle in self.paddle.triangle_views:
                 pygame.draw.polygon(self.screen, WHITE, triangle)
             pygame.draw.rect(self.screen, WHITE, self.ball.form)
-            self.screen.blit(self.font.render(str(self.score), -1, WHITE), (400, 550))
+            self.screen.blit(self.font.render(str(self.player.score), -1, WHITE), (400, 550))
 
             for button in buttons:
                 ui_action = button.update(pygame.mouse.get_pos(), mouse_up)

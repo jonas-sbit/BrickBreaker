@@ -1,5 +1,5 @@
 class Player:
-    """ Stores information about a player """
+    """ Stores information about the current player player """
 
     def __init__(self, score=0, lives=3, current_level=1):
         self.score = score
