@@ -43,10 +43,28 @@ class Brickbreaker:
         # TODO self.score umbauen auf Player.score
         self.score = 0
 
-    def create_blocks(self):
-        self.bricks = LevelGenerator().create_level(1)
+    def create_blocks(self, level):
+        """
+        description:
+            - Create the bricks for the given level using the LevelGenerator-Class
+        :param level: number of the level to create
+        :return: nothing
+        """
+        self.bricks = LevelGenerator().create_level(1) # TODO: anpassen
 
     def check_ball_collisions(self):
+        """
+        description:
+            - Checks all possible collisions that can occur for the ball.
+            - Bounce off at left, right and top edge.
+            - Bounce off from paddle using paddle.hitzones' vectors.
+            - Check for brick collision and delegate handling.
+            - TODO: Check win condition --> next level
+            - Check if player dropped the ball.
+                - TODO: Decrease lifes
+                - if decremented to 0 --> game over --> save score
+        :return:
+        """
         # collision left or right edge
         if self.ball.form.x <= 0 or self.ball.form.x >= DISPLAY_WIDTH:
             self.ball.collide_vertical()
