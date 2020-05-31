@@ -7,28 +7,30 @@ DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
 
 # Paddle Constants
+BOUNCE_OFF_VECTORS = [(-5, -1), (-4, -2), (-3, -3), (-2, -4), (-1, -5), (1, -5), (2, -4), (3, -3), (4, -2), (5, -1)]
 # each rect 8 wide, speed = 8 and left edge is multiple of 8 to enable across-the-border-movement (Special)
 PADDLE_PART_WIDTH = 8
 PADDLE_MAX_HEIGHT = 12
 PADDLE_TOP_EDGE = 500
 PADDLE_SLANTED_DIVISORS = (1.5, 3)      # order: inner to outer slanted part
+PADDLE_STARTING_LEFT_EDGE = 352
 # standard paddle consisting of 12 rectangles with corresponding bounce-off vector; order left to right
-STD_SIZE_PADDLE = [[pygame.Rect(352, PADDLE_TOP_EDGE + PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[0],
-                                PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[1]), (-5, -1)],
-                   [pygame.Rect(360, PADDLE_TOP_EDGE + PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[1],
-                                PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[0]), (-4, -2)],
-                   [pygame.Rect(368, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (-3, -3)],
-                   [pygame.Rect(376, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (-2, -4)],
-                   [pygame.Rect(384, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (-2, -4)],
-                   [pygame.Rect(392, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (-1, -5)],
-                   [pygame.Rect(400, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (1, -5)],
-                   [pygame.Rect(408, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (2, -4)],
-                   [pygame.Rect(416, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (2, -4)],
-                   [pygame.Rect(424, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (3, -3)],
-                   [pygame.Rect(432, PADDLE_TOP_EDGE + PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[1],
-                                PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[0]), (4, -2)],
-                   [pygame.Rect(440, PADDLE_TOP_EDGE + PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[0],
-                                PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[1]), (5, -1)]
+STD_SIZE_PADDLE = [[pygame.Rect(0, PADDLE_TOP_EDGE + PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[0],
+                                PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[1]), BOUNCE_OFF_VECTORS[0]],
+                   [pygame.Rect(0, PADDLE_TOP_EDGE + PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[1],
+                                PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[0]), BOUNCE_OFF_VECTORS[1]],
+                   [pygame.Rect(0, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), BOUNCE_OFF_VECTORS[2]],
+                   [pygame.Rect(0, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), BOUNCE_OFF_VECTORS[3]],
+                   [pygame.Rect(0, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), BOUNCE_OFF_VECTORS[3]],
+                   [pygame.Rect(0, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), BOUNCE_OFF_VECTORS[4]],
+                   [pygame.Rect(0, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), BOUNCE_OFF_VECTORS[5]],
+                   [pygame.Rect(0, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), BOUNCE_OFF_VECTORS[6]],
+                   [pygame.Rect(0, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), BOUNCE_OFF_VECTORS[6]],
+                   [pygame.Rect(0, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), BOUNCE_OFF_VECTORS[7]],
+                   [pygame.Rect(0, PADDLE_TOP_EDGE + PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[1],
+                                PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[0]), BOUNCE_OFF_VECTORS[8]],
+                   [pygame.Rect(0, PADDLE_TOP_EDGE + PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[0],
+                                PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT / PADDLE_SLANTED_DIVISORS[1]), BOUNCE_OFF_VECTORS[9]]
                    ]
 PADDLE_GROWTH_PARTS = [[pygame.Rect(0, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (-1, -5)],
                        [pygame.Rect(0, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDLE_MAX_HEIGHT), (1, -5)]]
@@ -72,6 +74,7 @@ class Paddle:
             - Initialize self.special with None as the paddle starts without any specials.
         """
         self.hitzones = STD_SIZE_PADDLE.copy()
+        self.set_position(PADDLE_STARTING_LEFT_EDGE)
         self.triangle_views = self.create_triangles()
         self.speed = STD_PADDLE_SPEED
         self.special = None
@@ -111,6 +114,22 @@ class Paddle:
         :return: bottom edge of the paddle
         """
         return self.hitzones[0][0].bottom
+
+    def get_center(self):
+        """
+        Description:
+            - Return the center of the whole paddle representation on screen.
+        :return: tuple (x, y) paddle center
+        """
+        return self.hitzones[int(len(self.hitzones) / 2)][0].left, self.hitzones[int(len(self.hitzones) / 2)][0].centery
+
+    def reset_position(self):
+        """
+        description:
+            - Moves the paddle to its initial starting position.
+        :return: nothing
+        """
+        self.set_position(PADDLE_STARTING_LEFT_EDGE)
 
     def activate_special(self, special):
         """

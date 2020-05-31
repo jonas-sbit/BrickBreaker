@@ -1,6 +1,7 @@
 import pygame
 from pygame.locals import *
-from GameElements import Paddle, Ball, Brick, Special, SpecialType, to_drop_special, choose_random_special
+from GameElements import Paddle, Ball, Brick, Special, \
+    SpecialType, to_drop_special, choose_random_special, BOUNCE_OFF_VECTORS
 from Player import Player
 from LevelGenerator import LevelGenerator
 from UIElement import WHITE, BLUE
@@ -45,11 +46,18 @@ class Brickbreaker:
 
     def start_game(self):
         self.create_blocks()
+        self.paddle.reset_position()
         # TODO: paddle zu default position (mittig) positionieren
         self.reset_ball()
 
     def reset_ball(self):
-        # TODO: Winkel beim start, ball in mitte positionieren
+        if not (self.active_special is None):
+            self.remove_special()
+        vector_indicator_start = self.paddle.get_center()
+        for vector in BOUNCE_OFF_VECTORS:
+            vector_indicator_end = (vector_indicator_start[0] + 2 * vector[0], vector_indicator_start[1] + 2 * vector[1])
+            pygame.draw.line(self.screen, WHITE, vector_indicator_start, vector_indicator_end)
+        # TODO: Winkel beim start, ball in mitte positionieren, loop bis leertaste gedrueckt, ggf. hinweis fuer controls
         self.ball.form.x = self.paddle.hitzones[3][0].x
         self.ball.form.y = 490
         self.ball.vector = self.paddle.hitzones[3][1]
