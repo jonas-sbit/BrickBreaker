@@ -233,7 +233,7 @@ class Brickbreaker:
             for event in pygame.event.get():
                 if event.type == QUIT:
                     os._exit(1)
-            keys = pygame.key.get_pressed()         # TODO: Pfeiltasten  bei rechts funktioniert nicht
+            keys = pygame.key.get_pressed()
             if keys[int(key_left)]:
                 self.paddle.move(-1)
             if keys[int(key_right)]:
@@ -244,8 +244,7 @@ class Brickbreaker:
                 return GameState.TITLE
 
             self.screen.fill(BLUE)
-            #self.paddle_update()
-            self.ballUpdate()
+            self.ball_update()
 
             for brick in self.bricks:
                 brick.show_brick(self.screen)
