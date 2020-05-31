@@ -143,9 +143,9 @@ class Paddle:   # TODO: bugfix when across border special auslaeuft waehrend tei
             else:  # positioned
                 counter_left_edge += 1
         if counter_right_edge > counter_left_edge:
-            return self.hitzones[len(self.hitzones) - 1][0].left
+            return self.hitzones[0][0].left
         else:
-            return self.hitzones[len(self.hitzones) - 1][0].left - 800
+            return self.hitzones[0][0].left - 800
 
     def change_size(self):
         # TODO: implement
@@ -188,12 +188,12 @@ class Paddle:   # TODO: bugfix when across border special auslaeuft waehrend tei
         else:
             for paddle_part in self.hitzones:
                 paddle_part[0].x += self.speed * direction
-                if direction == 1:  # right movement
+                if direction == 1:                              # right movement
                     if paddle_part[0].left >= DISPLAY_WIDTH:
-                        paddle_part[0].x = 0
-                else:  # left movement
+                        paddle_part[0].x -= DISPLAY_WIDTH
+                else:                                           # left movement
                     if paddle_part[0].right <= 0:
-                        paddle_part[0].x = DISPLAY_WIDTH - paddle_part[0].width
+                        paddle_part[0].x += DISPLAY_WIDTH
         self.triangle_views = self.create_triangles()
 
     def set_position(self, left_edge):
@@ -461,5 +461,5 @@ def to_drop_special():
         -
     :return:
     """
-    c = choice([False, True], 1, p=[0.5, 0.5])  # Hier WSLKT Anpassen falls zu viele / wenige Powerups kommen
+    c = choice([False, True], 1, p=[0.85, 0.15])  # Hier WSLKT Anpassen falls zu viele / wenige Powerups kommen
     return c[0]

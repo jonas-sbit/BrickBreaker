@@ -205,9 +205,10 @@ class Brickbreaker:
             - Check if any specials, i.e. special.rect, currently present on the screen is caught with the paddle.
             - To be caught the special has to be completely within the paddle's horizontal width and the paddle's
               height.
-            - Remove active special if new special is caught.
-            - Activate special on self or paddle based on its type.
-            - Remove the special from the currently present specials and set self.active special.
+                - Remove active special if new special is caught.
+                - Activate special on self or paddle based on its type.
+                - Remove the special from the currently present specials and set self.active special.
+            - If special is off screen, remove it.
         :return: nothing
         """
         if len(self.present_specials) > 0:
@@ -224,6 +225,9 @@ class Brickbreaker:
                     self.present_specials.remove(special)
                     self.active_special = special
                     self.active_special.activate(self.clock_speed)
+                    print(self.active_special.special_type)
+                elif special.rect.top > DISPLAY_HEIGHT:
+                    self.present_specials.remove(special)
 
     def activate_special(self, special):
         """
