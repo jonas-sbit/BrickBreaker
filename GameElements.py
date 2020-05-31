@@ -3,7 +3,6 @@ import os
 from enum import Enum
 from numpy.random import choice
 
-
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
 
@@ -22,20 +21,20 @@ DISPLAY_HEIGHT = 600
 
 # standard paddle consisting of 12 rectangles with corresponding bounce-off vector; order left to right
 # each rect 8 wide, speed = 8 and left edge is multiple of 8 to enable across-the-border-movement (Special)
-STD_SIZE_PADDLE = [[pygame.Rect(320, 508, 8, 4), (-5, -1)],
-                   [pygame.Rect(328, 504, 8, 8), (-4, -2)],
-                   [pygame.Rect(336, 500, 8, 12), (-3, -3)],
-                   [pygame.Rect(344, 500, 8, 12), (-2, -4)],
-                   [pygame.Rect(352, 500, 8, 12), (-2, -4)],
-                   [pygame.Rect(360, 500, 8, 12), (-1, -5)],
-                   [pygame.Rect(368, 500, 8, 12), (1, -5)],
-                   [pygame.Rect(376, 500, 8, 12), (2, -4)],
-                   [pygame.Rect(384, 500, 8, 12), (2, -4)],
-                   [pygame.Rect(392, 500, 8, 12), (3, -3)],
-                   [pygame.Rect(400, 504, 8, 8), (4, -2)],
-                   [pygame.Rect(408, 508, 8, 4), (5, -1)]
+PADDLE_PART_WIDTH = 8
+STD_SIZE_PADDLE = [[pygame.Rect(320, 508, PADDLE_PART_WIDTH, 4), (-5, -1)],
+                   [pygame.Rect(328, 504, PADDLE_PART_WIDTH, 8), (-4, -2)],
+                   [pygame.Rect(336, 500, PADDLE_PART_WIDTH, 12), (-3, -3)],
+                   [pygame.Rect(344, 500, PADDLE_PART_WIDTH, 12), (-2, -4)],
+                   [pygame.Rect(352, 500, PADDLE_PART_WIDTH, 12), (-2, -4)],
+                   [pygame.Rect(360, 500, PADDLE_PART_WIDTH, 12), (-1, -5)],
+                   [pygame.Rect(368, 500, PADDLE_PART_WIDTH, 12), (1, -5)],
+                   [pygame.Rect(376, 500, PADDLE_PART_WIDTH, 12), (2, -4)],
+                   [pygame.Rect(384, 500, PADDLE_PART_WIDTH, 12), (2, -4)],
+                   [pygame.Rect(392, 500, PADDLE_PART_WIDTH, 12), (3, -3)],
+                   [pygame.Rect(400, 504, PADDLE_PART_WIDTH, 8), (4, -2)],
+                   [pygame.Rect(408, 508, PADDLE_PART_WIDTH, 4), (5, -1)]
                    ]
-
 STD_PADDLE_SPEED = 8
 
 STD_FORM_BALL = pygame.Rect(315, 490, 5, 5)
@@ -49,6 +48,9 @@ BSI_path = os.path.join(CRNT_PATH, 'brick_state_images')  # The Brick State Imag
 
 SPECIAL_WIDTH = 25
 SPECIAL_HEIGHT = 10
+SPECIAL_COLOR = (135, 135, 135)
+SPECIAL_FALL_SPEED = 2
+SPECIAL_TTL = 10
 
 
 class Movement(Enum):
@@ -58,7 +60,7 @@ class Movement(Enum):
     RIGHT = 3
 
 
-class Paddle:
+class Paddle:   # TODO: bugfix when across border special auslaeuft waehrend teilweise auf jeder seite
     def __init__(self):
         """
         description:
@@ -73,15 +75,56 @@ class Paddle:
         self.speed = STD_PADDLE_SPEED
         self.special = None
 
-    def add_special(self, special):
-        self.special = special
+    def get_left_edge(self):
+        """
 
-    def tick(self):
-        self.special.time = self.special.time - 1
-        # TODO: remove special if time is decremented to 0;
-        #  if special was ACROSS_BORDERS: check if more on left or right edge of the screen
-        if self.hitzones[0][0].left > (DISPLAY_WIDTH / 2) > self.hitzones[len(self.hitzones) - 1][0].right:
-            self.set_position(self.determine_standard_position())
+        :return:
+        """
+        return self.hitzones[0][0].left
+
+    def get_right_edge(self):
+        """
+
+        :return:
+        """
+        return self.hitzones[len(self.hitzones) - 1][0].right
+
+    def get_top_edge(self):
+        """
+
+        :return:
+        """
+        top_edge = self.hitzones[0][0].top
+        for paddle_part in self.hitzones:
+            if paddle_part[0].top < top_edge:
+                top_edge = paddle_part[0].top
+        return top_edge
+
+    def get_bottom_edge(self):
+        """
+
+        :return:
+        """
+        return self.hitzones[0][0].bottom
+
+    def activate_special(self, special):
+        self.special = special
+        # TODO: check type and if size changing --> change size
+
+    def remove_special(self):
+        """
+        description:
+            - Remove the special from the paddle and restore the standard state.
+            -
+        :return: nothing
+        """
+        if not (self.special is None):
+            if self.special.special_type == SpecialType.BIGGER_PADDLE or self.special.special_type == SpecialType.SMALLER_PADDLE:
+                self.reset_size()
+            elif self.special.special_type == SpecialType.ACROSS_BORDER:
+                if self.get_left_edge() > (DISPLAY_WIDTH / 2) > self.get_right_edge():
+                    self.set_position(self.determine_standard_position())
+            self.special = None
 
     def determine_standard_position(self):
         """
@@ -95,16 +138,17 @@ class Paddle:
         counter_right_edge = 0
         counter_left_edge = 0
         for paddle_part in self.hitzones:
-            if paddle_part[0].x > DISPLAY_WIDTH / 2:            # positioned at right edge
+            if paddle_part[0].x > DISPLAY_WIDTH / 2:  # positioned at right edge
                 counter_right_edge += 1
-            else:                                               # positioned
+            else:  # positioned
                 counter_left_edge += 1
         if counter_right_edge > counter_left_edge:
-            return self.hitzones[len(self.hitzones)-1][0].left
+            return self.hitzones[len(self.hitzones) - 1][0].left
         else:
-            return self.hitzones[len(self.hitzones)-1][0].left - 800
+            return self.hitzones[len(self.hitzones) - 1][0].left - 800
 
     def change_size(self):
+        # TODO: implement
         pass
 
     def reset_size(self):
@@ -128,20 +172,26 @@ class Paddle:
         :param direction: 1 for right-movement, -1 for left-movement
         :return: nothing
         """
-        over_edge = False   # TODO: Special check
-        if not over_edge:
+        across_edge_special_active = False
+        if not (self.special is None):
+            if self.special.special_type == SpecialType.CONFUSED_CONTROLS:
+                direction *= -1
+            elif self.special.special_type == SpecialType.ACROSS_BORDER:
+                across_edge_special_active = True
+
+        if not across_edge_special_active:
             if not (self.hitzones[0][0].left + (self.speed * direction)) > DISPLAY_WIDTH and \
-                    not (self.hitzones[len(self.hitzones)-1][0].right + (self.speed * direction)) < 0:
+                    not (self.hitzones[len(self.hitzones) - 1][0].right + (self.speed * direction)) < 0:
                 for paddle_part in self.hitzones:
                     paddle_part[0].x += self.speed * direction
                 self.triangle_views = self.create_triangles()
         else:
             for paddle_part in self.hitzones:
                 paddle_part[0].x += self.speed * direction
-                if direction == 1:                                  # right movement
+                if direction == 1:  # right movement
                     if paddle_part[0].left >= DISPLAY_WIDTH:
                         paddle_part[0].x = 0
-                else:                                               # left movement
+                else:  # left movement
                     if paddle_part[0].right <= 0:
                         paddle_part[0].x = DISPLAY_WIDTH - paddle_part[0].width
         self.triangle_views = self.create_triangles()
@@ -155,7 +205,7 @@ class Paddle:
         """
         i = 0
         for paddle_part in self.hitzones:
-            paddle_part[0].x = left_edge + (i * 8)
+            paddle_part[0].x = left_edge + (i * PADDLE_PART_WIDTH)
             i += 1
         self.update_triangles()
 
@@ -182,16 +232,16 @@ class Paddle:
                  (self.hitzones[len(self.hitzones) - 3][0].right, self.hitzones[len(self.hitzones) - 1][0].top)])"""
         return ([self.hitzones[0][0].topleft,
                  self.hitzones[0][0].topright,
-                (self.hitzones[0][0].right, self.hitzones[1][0].top)],
+                 (self.hitzones[0][0].right, self.hitzones[1][0].top)],
                 [self.hitzones[1][0].topleft,
                  self.hitzones[1][0].topright,
-                (self.hitzones[1][0].right, self.hitzones[2][0].top)],
+                 (self.hitzones[1][0].right, self.hitzones[2][0].top)],
                 [self.hitzones[len(self.hitzones) - 1][0].topright,
                  self.hitzones[len(self.hitzones) - 1][0].topleft,
-                (self.hitzones[len(self.hitzones) - 1][0].left, self.hitzones[len(self.hitzones) - 2][0].top)],
+                 (self.hitzones[len(self.hitzones) - 1][0].left, self.hitzones[len(self.hitzones) - 2][0].top)],
                 [self.hitzones[len(self.hitzones) - 2][0].topright,
                  self.hitzones[len(self.hitzones) - 2][0].topleft,
-                (self.hitzones[len(self.hitzones) - 2][0].left, self.hitzones[len(self.hitzones) - 3][0].top)])
+                 (self.hitzones[len(self.hitzones) - 2][0].left, self.hitzones[len(self.hitzones) - 3][0].top)])
 
 
 class Ball:
@@ -309,70 +359,107 @@ class Brick:
             screen.blit(self.brick_state_images[self.hits_left - 1], self.rect)
 
 
-class Special():
+class Special:
 
-    def __init__(self, start_coordinates):
+    def __init__(self, start_coordinates, special_type):
         """
-            description:
-                - creates a new object of the special class
-            :param start_coordinates: a tuple containing the x- and y-coordinate of the brick's starting point
+        description:
+            - Create a new object of the special class.
+        :param start_coordinates: a tuple containing the x- and y-coordinate of the special's starting point
+        :param type: SpecialType-enum value indicating the type that was created.
         """
         self.rect = pygame.Rect(start_coordinates[0], start_coordinates[1], SPECIAL_WIDTH, SPECIAL_HEIGHT)
+        self.special_type = special_type
+        self.ttl = 0
 
-    def show_special(self):
+    def show_special(self, screen):
         """
-            description:
-                - shows the special, has to be called in a loop  
+        description:
+            - Draw the special's rect representation to the screen.
+        :param screen: the screen to draw the special on
+        :return:
         """
-        self.special_type = Random_Special_Chooser()
+        # TODO: color based on negative positive neutral
+        pygame.draw.rect(screen, SPECIAL_COLOR, self.rect)
 
-    def activate_special(self):
+    def fall(self):
+        self.rect.y += SPECIAL_FALL_SPEED
+
+    def is_paddle_special(self):
         """
-            description:
-                - activates the special if its 'catched' 
+        description:
+            - Checks whether the Special is a special changing the paddle's behaviour.
+        :return: boolean whether the special changes the paddle's behaviour or not
         """
-        if self.special_type == SpecialType.Faster:
-            pass
-        elif self.special_type == SpecialType.Bigger_Paddle:
-            pass
-        elif self.special_type == SpecialType.Smaller_Paddle:
-            pass
-        elif self.special_type == SpecialType.Confused_Controls:
-            pass
-        elif self.special_type == SpecialType.Extra_Life:
-            pass
+        paddle_specials = (2, 3, 4, 5)
+        if self.special_type.value in paddle_specials:
+            return True
+        else:
+            return False
+
+    def activate(self, clock_speed):
+        """
+        description:
+            - Initialize the time to live based on the clock speed in order for the special to stay alive
+              for the same timespan no matter the clock speed.
+        :param clock_speed:
+        :return: nothing
+        """
+        self.ttl = clock_speed * SPECIAL_TTL
+
+    def tick(self):
+        """
+        description:
+            - Decrement object's time to live.
+        :return: boolean whether the ttl was decremented to 0, i.e. is no longer active
+        """
+        self.ttl -= 1
+        return self.ttl == 0
 
 
 class SpecialType(Enum):
-    Faster = 0
-    Slower = 1
-    Bigger_Paddle = 2
-    Smaller_Paddle = 3
-    Confused_Controls = 4
-    Extra_Life = 5
+    FASTER = 0
+    SLOWER = 1
+    BIGGER_PADDLE = 2
+    SMALLER_PADDLE = 3
+    CONFUSED_CONTROLS = 4
+    ACROSS_BORDER = 5
+    BONUS_LIFE = 6
 
 
-def Random_Special_Chooser():
+def choose_random_special():
+    """
+    description:
+        -
+    :return:
+    """
     c = choice([
-        SpecialType.Faster,
-        SpecialType.Slower,
-        SpecialType.Bigger_Paddle,
-        SpecialType.Smaller_Paddle,
-        SpecialType.Confused_Controls,
-        SpecialType.Extra_Life],
+        SpecialType.FASTER,
+        SpecialType.SLOWER,
+        SpecialType.BIGGER_PADDLE,
+        SpecialType.SMALLER_PADDLE,
+        SpecialType.CONFUSED_CONTROLS,
+        SpecialType.ACROSS_BORDER,
+        SpecialType.BONUS_LIFE],
         1,
-        [
-            0.2,
-            0.2,
-            0.2,
-            0.2,
-            0.1,
+        p=[
+            0.15,
+            0.15,
+            0.15,
+            0.15,
+            0.15,
+            0.15,
             0.1,
         ]
     )
     return c[0]
 
 
-def Random_Show_Special():
-    c = choice([False, True], 1, [0.01, 0.99])  # Hier WSLKT Anpassen falls zu viele / wenige Powerups kommen
+def to_drop_special():
+    """
+    description:
+        -
+    :return:
+    """
+    c = choice([False, True], 1, p=[0.5, 0.5])  # Hier WSLKT Anpassen falls zu viele / wenige Powerups kommen
     return c[0]

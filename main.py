@@ -2,7 +2,7 @@ import pygame
 from Player import Player
 from pages import Pages
 from GameState import GameState
-from GameElements import Special, Random_Show_Special
+# from GameElements import Special, Random_Show_Special
 
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
@@ -18,9 +18,9 @@ def main():
     player = Player()
 
     # TEST Julian
-    special = Special((100,100))
-    if Random_Show_Special():
-        special.show_special()
+    #special = Special((100,100))
+    #if Random_Show_Special():
+    #    special.show_special()
 
 
     # Aufrufen der Logik, die die Pages aufruft

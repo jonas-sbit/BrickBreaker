@@ -1,6 +1,6 @@
 import pygame
 from pygame.locals import *
-from GameElements import Paddle, Ball, Brick
+from GameElements import Paddle, Ball, Brick, Special, SpecialType, to_drop_special, choose_random_special
 from LevelGenerator import LevelGenerator
 from UIElement import WHITE, BLUE
 from GameElements import Movement
@@ -11,6 +11,8 @@ import os
 
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
+DEFAULT_CLOCK_SPEED = 60
+CLOCK_SPEED_CHANGE_FACTOR = 1.5
 
 
 class RectSide(Enum):
@@ -27,12 +29,14 @@ class CollisionType(Enum):
 
 class Brickbreaker:
     def __init__(self):
+        self.clock_speed = DEFAULT_CLOCK_SPEED
         self.screen = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
         self.bricks = []
-
         self.paddle = Paddle()
-        # TODO: Zufallsstartpunkt?
+        # TODO: Winkel beim start, ball in mitte positionieren
         self.ball = Ball(self.paddle.hitzones[3][1])
+        self.present_specials = []
+        self.active_special = None
 
         pygame.font.init()
         self.font = pygame.font.SysFont("Arial", 25)
@@ -41,26 +45,8 @@ class Brickbreaker:
 
     def create_blocks(self):
         self.bricks = LevelGenerator().create_level(1)
-        # []
-        # y = 50
-        # for __ in range(20):
-        #     x = 50
-        #     for _ in range(26):
-        #         block = pygame.Rect(x, y, 25, 10)
-        #         self.blocks.append(block)
-        #         x += 27
-        #     y += 12
 
-    def ball_update(self):
-        # idee: x und y bewegung getrennt durchfuehren
-        self.ball.move()
-        """speed = self.speeds[self.angle]
-        xMovement = True
-        if _:
-            self.ball.x += speed[0] * self.direction
-        else:
-            self.ball.y += speed[1] * self.direction * self.yDirection
-            xMovement = False"""
+    def check_ball_collisions(self):
         # collision left or right edge
         if self.ball.form.x <= 0 or self.ball.form.x >= DISPLAY_WIDTH:
             self.ball.collide_vertical()
@@ -197,7 +183,7 @@ class Brickbreaker:
         description:
             - Call function to change ball's movement direction based on the collision_type.
             - Call Brick's get_hit() function.
-            - Destroy brick and increase score if brick was destroyed.
+            - Destroy brick, increase score if brick was destroyed and create a special with a certain probability.
         :param brick_hit: Brick-object to perform the collision with
         :param collision_type: CollisionType-Enum
         :return: nothing
@@ -210,6 +196,63 @@ class Brickbreaker:
         if brick_hit.get_hit():
             self.bricks.remove(brick_hit)
             self.score += 1
+            if to_drop_special():
+                self.present_specials.append(Special(brick_hit.rect.topleft, choose_random_special()))
+
+    def check_special_collisions(self):
+        """
+        description:
+            - Check if any specials, i.e. special.rect, currently present on the screen is caught with the paddle.
+            - To be caught the special has to be completely within the paddle's horizontal width and the paddle's
+              height.
+            - Remove active special if new special is caught.
+            - Activate special on self or paddle based on its type.
+            - Remove the special from the currently present specials and set self.active special.
+        :return: nothing
+        """
+        if len(self.present_specials) > 0:
+            for special in self.present_specials:
+                if (self.paddle.get_top_edge() < special.rect.bottom <= self.paddle.get_bottom_edge()) \
+                        and self.paddle.get_left_edge() <= special.rect.left \
+                        and self.paddle.get_right_edge() >= special.rect.right:
+                    if not (self.active_special is None):
+                        self.remove_special()
+                    if special.is_paddle_special():
+                        self.paddle.activate_special(special)
+                    else:
+                        self.activate_special(special)
+                    self.present_specials.remove(special)
+                    self.active_special = special
+                    self.active_special.activate(self.clock_speed)
+
+    def activate_special(self, special):
+        """
+        description:
+            - Activate a caught non-paddle special.
+            - Either add a bonus life or adjust clock speed based on special.type
+        :param special: the caught special
+        :return: nothing
+        """
+        if special.special_type == SpecialType.BONUS_LIFE:
+            pass # TODO: add life to player lifes
+        elif special.special_type == SpecialType.FASTER:
+            self.clock_speed = DEFAULT_CLOCK_SPEED * CLOCK_SPEED_CHANGE_FACTOR
+        elif special.special_type == SpecialType.SLOWER:
+            self.clock_speed = DEFAULT_CLOCK_SPEED / CLOCK_SPEED_CHANGE_FACTOR
+
+    def remove_special(self):
+        """
+        description:
+            - Remove the currently active special and negate its effect.
+            - If is_paddle_special: remove special from pedal
+            - else: reset self.clock_speed
+        :return: nothing
+        """
+        if self.active_special.is_paddle_special():
+            self.paddle.remove_special()
+        else:
+            self.clock_speed = DEFAULT_CLOCK_SPEED
+        self.active_special = None
 
     def main(self, buttons):
         # pygame.mouse.set_visible(False)
@@ -228,7 +271,7 @@ class Brickbreaker:
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                     mouse_up = True
 
-            clock.tick(60)
+            clock.tick(self.clock_speed)
 
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -244,7 +287,17 @@ class Brickbreaker:
                 return GameState.TITLE
 
             self.screen.fill(BLUE)
-            self.ball_update()
+            # update ball
+            self.ball.move()
+            self.check_ball_collisions()
+            # update specials
+            if not (self.active_special is None):
+                if self.active_special.tick():
+                    self.remove_special()
+            self.check_special_collisions()
+            for special in self.present_specials:
+                special.fall()
+                special.show_special(self.screen)
 
             for brick in self.bricks:
                 brick.show_brick(self.screen)
