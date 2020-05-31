@@ -235,13 +235,25 @@ class Pages():
                         if event.key == pygame.K_ESCAPE:
                             return GameState.SETTINGS                           
                         if level == -1:
-                            if event.unicode != sets[3] and event.unicode != sets[5]:
-                                dbi.update_move_left(event.unicode, event.key)
+                            if event.key != sets[3] and event.key != sets[5] and event.key != pygame.K_SPACE:
+                                if event.key == pygame.K_LEFT:
+                                    dbi.update_move_left("<-", event.key)
+                                elif event.key == pygame.K_RIGHT:
+                                    dbi.update_move_left("->", event.key)
+                                else:
+                                    dbi.update_move_left(event.unicode, event.key)
+
                         elif level == -2:
-                            if event.unicode != sets[1] and event.unicode != sets[5]:
-                                dbi.update_move_right(event.unicode, event.key)
+                            if event.key != sets[1] and event.key != sets[5]:
+                                if event.key == pygame.K_LEFT:
+                                    dbi.update_move_right("<-", event.key)
+                                elif event.key == pygame.K_RIGHT:
+                                    dbi.update_move_right("->", event.key)
+                                else:
+                                    dbi.update_move_right(event.unicode, event.key)
+                                    
                         elif level == -3:
-                            if event.unicode != sets[1] and event.unicode != sets[3]:
+                            if event.key != sets[1] and event.key != sets[3]:
                                 dbi.update_do_pause(event.unicode, event.key)
                         elif level == -4:
                             if event.key == 270 or event.key == 93:
