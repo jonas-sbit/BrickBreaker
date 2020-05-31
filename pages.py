@@ -11,8 +11,11 @@ from HighscorePage import highscore, show_top10
 MAXIMUM_DIFFICULTY = 4
 MINIMUM_DIFFICULTY = 1
 
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+
 class Pages():
-    
+
     def title_screen(self, screen):
         start_btn = UIElement(
             center_position=(400, 100),
@@ -46,8 +49,16 @@ class Pages():
             text="Beenden",
             action=GameState.QUIT,
         )
+        play_music_btn = UIElement(
+            center_position=(400, 500),
+            font_size=30,
+            bg_rgb=BLUE,
+            text_rgb=WHITE,
+            text="♫",
+            action=GameState.PLAY_MUSIC,
+        )
 
-        buttons = RenderUpdates(start_btn, quit_btn, settings_btn, highscore_btn)
+        buttons = RenderUpdates(start_btn, quit_btn, settings_btn, highscore_btn, play_music_btn)
 
         return self.game_loop(screen, buttons, 0)
 
@@ -66,18 +77,6 @@ class Pages():
         return self.game_loop(screen, buttons, 1)
 
     def highscore_page(self, screen, player):
-        # return_btn = UIElement(
-        #     center_position=(140, 570),
-        #     font_size=20,
-        #     bg_rgb=BLUE,
-        #     text_rgb=WHITE,
-        #     text="Return to main menu",
-        #     action=GameState.TITLE,
-        # )
-
-        # buttons = RenderUpdates(return_btn)
-
-        # return self.game_loop(screen, buttons, 0)
         font = pygame.font.SysFont("Arial", 16)
 
         my_score = 4
@@ -251,7 +250,7 @@ class Pages():
                                     dbi.update_move_right("->", event.key)
                                 else:
                                     dbi.update_move_right(event.unicode, event.key)
-                                    
+
                         elif level == -3:
                             if event.key != sets[1] and event.key != sets[3]:
                                 dbi.update_do_pause(event.unicode, event.key)
@@ -318,6 +317,10 @@ class Pages():
 
         if game_state == GameState.QUIT:
             game_state = GameState.QUIT
+
+        if game_state == GameState.PLAY_MUSIC:
+            # TODO Methode fuer musik aufrufen
+            game_state = self.title_screen(screen)
 
         return game_state  
 

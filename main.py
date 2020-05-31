@@ -17,7 +17,7 @@ def main():
     game_state = GameState.TITLE
     player = Player()
 
-    # TEST JONAS
+    # TEST Julian
     special = Special((100,100))
     if Random_Show_Special():
         special.show_special()
