@@ -114,6 +114,7 @@ class Brickbreaker:
             self.player.lives -= 1
             if self.player.lives == 0:
                 # TODO: save score
+                self.player.lives = 3 # TODO: an schwierigkeitsgrad anpassen
                 self.player.score = 0
                 self.player.current_level = 1
                 self.create_blocks()
