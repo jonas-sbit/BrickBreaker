@@ -12,6 +12,7 @@ import os
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
 
+
 class RectSide(Enum):
     TOP = 0
     BOTTOM = 1
@@ -50,7 +51,7 @@ class Brickbreaker:
         #         x += 27
         #     y += 12
 
-    def ballUpdate(self):
+    def ball_update(self):
         # idee: x und y bewegung getrennt durchfuehren
         self.ball.move()
         """speed = self.speeds[self.angle]
@@ -84,7 +85,6 @@ class Brickbreaker:
                 collision_bricks.append(brick)
         if len(collision_bricks) > 0:
             self.handle_brick_collisions(collision_bricks)
-            print(len(collision_bricks))
 
         # collision bottom edge --> lost
         if self.ball.form.y > DISPLAY_HEIGHT:

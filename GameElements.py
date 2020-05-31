@@ -273,9 +273,7 @@ class Brick:
     brick_state_images = [pygame.image.load(os.path.join(BSI_path, 'brick_state_0.png')),
                           pygame.image.load(os.path.join(BSI_path, 'brick_state_1.png')),
                           pygame.image.load(os.path.join(BSI_path, 'brick_state_2.png')),
-                          pygame.image.load(os.path.join(BSI_path, 'brick_state_3.png')),
-                          pygame.image.load(os.path.join(BSI_path, 'brick_state_4.png')),
-                          pygame.image.load(os.path.join(BSI_path, 'brick_state_5.png'))]
+                          pygame.image.load(os.path.join(BSI_path, 'brick_state_3.png'))]
 
     def __init__(self, coordinates, max_hits):
         """
@@ -285,7 +283,7 @@ class Brick:
             :param coordinates: a tuple containing the x- and y-coordinate of the brick's starting point
         """
         self.rect = pygame.Rect(coordinates[0], coordinates[1], BRICK_WIDTH, BRICK_HEIGHT)
-        self.hits_left = max_hits
+        self.hits_left = max_hits if max_hits <= 4 else 4
 
     def get_hit(self):
         """
