@@ -35,7 +35,9 @@ PADDLE_GROWTH_PARTS = [[pygame.Rect(0, PADDLE_TOP_EDGE, PADDLE_PART_WIDTH, PADDL
 STD_PADDLE_SPEED = 8
 
 # Ball Constants
-STD_FORM_BALL = pygame.Rect(315, 490, 5, 5)
+BALL_WIDTH = 5
+BALL_HEIGHT = 5
+STD_FORM_BALL = pygame.Rect(315, 490, BALL_WIDTH, BALL_HEIGHT)
 
 # Brick Constants
 BRICK_WIDTH = 25
@@ -370,6 +372,16 @@ class Ball:
         :return: nothing
         """
         self.vector = (self.vector[0] * -1, self.vector[1])
+
+    def center_over_paddle(self, paddle_center):
+        """
+        description:
+            - Position the ball (roughly) centered above the paddle.
+        :param paddle_center: tuple(x, y) containing the paddle's center coordinates.
+        :return: nothing
+        """
+        self.form.x = paddle_center[0] - int(BALL_WIDTH / 2)
+        self.form.y = paddle_center[1] - int(PADDLE_MAX_HEIGHT / 2) - BALL_HEIGHT - 2
 
 
 class Brick:

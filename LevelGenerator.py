@@ -19,7 +19,12 @@ class LevelGenerator():
             9:  self.create_level_9(),
             10:  self.create_level_10()
         }
-        return switcher.get(level, self.create_level_1())
+        bricks = switcher.get(level, self.create_level_1())
+        unbreakable_bricks = 0
+        for brick in bricks:
+            if brick.hits_left == -1:           # unbreakable
+                unbreakable_bricks += 1
+        return bricks, unbreakable_bricks
 
     def create_level_1(self):
         y = 50
@@ -307,15 +312,7 @@ class LevelGenerator():
         return blocks 
              
     def create_level_6(self):
-        y = 50
-        blocks = []
-        for __ in range(20):
-            x = 50
-            for _ in range(26):
-                block = Brick((x, y), 6)
-                blocks.append(block)
-                x += 27
-            y += 12
+        blocks = [Brick((50, 50), 1), Brick((80, 50), -1)]
         return blocks   
              
     def create_level_7(self):

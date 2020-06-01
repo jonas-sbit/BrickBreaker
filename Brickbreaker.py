@@ -32,6 +32,7 @@ class Brickbreaker:
         self.clock_speed = DEFAULT_CLOCK_SPEED
         self.screen = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
         self.bricks = []
+        self.number_unbreakable_bricks = 0
         self.paddle = Paddle()
         self.ball = Ball()
         self.present_specials = []
@@ -40,25 +41,68 @@ class Brickbreaker:
         pygame.font.init()
         self.font = pygame.font.SysFont("Arial", 25)
         # TODO: mit schwierigkeitsgrad startleben bestimmen, ggf. stand laden
-        self.player = Player()
+        self.player = Player(current_level=6)
 
     def start_game(self):
+        """
+        description:
+            - Create new level.
+            - Position the paddle to the middle of the screen.
+            - Call method to choose starting angle.
+        :return: nothing
+        """
         self.create_blocks()
         self.paddle.reset_position()
-        # TODO: paddle zu default position (mittig) positionieren
         self.reset_ball()
 
     def reset_ball(self):
+        """
+        description:
+            - Center the ball over paddle and give the player the opportunity to choose inital angle.
+            - Loop:
+                - Switch angles using custom set left and right keys. Selected angles is displayed.
+                - Shoot ball using custom set key.
+        :return: nothing
+        """
         if not (self.active_special is None):
             self.remove_special()
-        vector_indicator_start = self.paddle.get_center()
-        for vector in BOUNCE_OFF_VECTORS:
-            vector_indicator_end = (vector_indicator_start[0] + 2 * vector[0], vector_indicator_start[1] + 2 * vector[1])
-            pygame.draw.line(self.screen, WHITE, vector_indicator_start, vector_indicator_end)
-        # TODO: Winkel beim start, ball in mitte positionieren, loop bis leertaste gedrueckt, ggf. hinweis fuer controls
-        self.ball.form.x = self.paddle.hitzones[3][0].x
-        self.ball.form.y = 490
-        self.ball.vector = self.paddle.hitzones[3][1]
+
+        dbi = DatabaseInteract()
+        sets = dbi.get_settings()
+        key_left = int(sets[2])
+        key_right = int(sets[4])
+
+        self.ball.center_over_paddle(self.paddle.get_center())
+
+        vector_indicator_start = (self.ball.form.centerx, self.ball.form.centery - 5)
+        current_index = int(len(BOUNCE_OFF_VECTORS)/2) - 1
+        clock = pygame.time.Clock()
+        vector_selected = False
+        while not vector_selected:
+            clock.tick(20)
+            self.draw_all()
+            currently_selected_vector = BOUNCE_OFF_VECTORS[current_index]
+            events = pygame.event.get()
+            for event in events:
+                if event.type == QUIT:
+                    os._exit(1)
+                if event.type == pygame.KEYDOWN:
+                    if event.key == key_left:
+                        if current_index > 0:
+                            current_index -= 1
+                    elif event.key == key_right:
+                        if current_index < len(BOUNCE_OFF_VECTORS) - 1:
+                            current_index += 1
+                    elif event.key == pygame.K_SPACE:
+                        self.ball.vector = currently_selected_vector
+                        vector_selected = True
+                        break
+
+            vector_indicator_end = (vector_indicator_start[0] + 10 * currently_selected_vector[0],
+                                    vector_indicator_start[1] + 10 * currently_selected_vector[1])
+            pygame.draw.line(self.screen, WHITE, vector_indicator_start, vector_indicator_end, 3)
+
+            pygame.display.update()
 
     def create_blocks(self):
         """
@@ -66,7 +110,7 @@ class Brickbreaker:
             - Create the bricks for the player's current level using the LevelGenerator-Class
         :return: nothing
         """
-        self.bricks = LevelGenerator().create_level(self.player.current_level) # TODO: anpassen
+        self.bricks, self.number_unbreakable_bricks = LevelGenerator().create_level(self.player.current_level) # TODO: anpassen
 
     def check_ball_collisions(self):
         """
@@ -75,10 +119,8 @@ class Brickbreaker:
             - Bounce off at left, right and top edge.
             - Bounce off from paddle using paddle.hitzones' vectors.
             - Check for brick collision and delegate handling.
-            - TODO: Check win condition --> next level
             - Check if player dropped the ball.
-                - TODO: Decrease lifes
-                - if decremented to 0 --> game over --> save score
+                - if decremented to 0 --> game over --> save score --> restart
         :return:
         """
         # collision left or right edge
@@ -114,8 +156,9 @@ class Brickbreaker:
                 self.player.lives = 3 # TODO: an schwierigkeitsgrad anpassen
                 self.player.score = 0
                 self.player.current_level = 1
-                self.create_blocks()
-            self.reset_ball()
+                self.start_game()
+            else:
+                self.reset_ball()
 
     def check_previously_horizontally_outside(self, brick_rect, horizontal_movement):
         """
@@ -294,6 +337,37 @@ class Brickbreaker:
             self.clock_speed = DEFAULT_CLOCK_SPEED
         self.active_special = None
 
+    def draw_all(self):
+        self.screen.fill(BLUE)
+        for brick in self.bricks:
+            brick.show_brick(self.screen)
+        for paddle_part in self.paddle.hitzones:
+            pygame.draw.rect(self.screen, WHITE, paddle_part[0])
+        for triangle in self.paddle.triangle_views:
+            pygame.draw.polygon(self.screen, WHITE, triangle)
+        for special in self.present_specials:
+            special.fall()
+            special.show_special(self.screen)
+        self.player.draw_lives(self.screen)
+        pygame.draw.rect(self.screen, WHITE, self.ball.form)
+        self.screen.blit(self.font.render(str(self.player.score), -1, WHITE), (400, 550))
+        pygame.display.update()
+
+    def level_completed(self):
+        """
+        description:
+            - Called when the player completes a level.
+            - If level 10 was completed: Finish Screen TODO docstring update
+            - Else: increase level, add bonus life
+        :return:
+        """
+        if self.player.current_level == 10:
+            pass  # TODO: du bist king
+        else:
+            self.player.current_level += 1
+            self.player.lives += 1
+            self.start_game()
+
     def main(self, buttons):
         # pygame.mouse.set_visible(False)
         clock = pygame.time.Clock()
@@ -326,7 +400,7 @@ class Brickbreaker:
             if keys[pygame.K_ESCAPE]:
                 return GameState.TITLE
 
-            self.screen.fill(BLUE)
+
             # update ball
             self.ball.move()
             self.check_ball_collisions()
@@ -337,20 +411,12 @@ class Brickbreaker:
             self.check_special_collisions()
 
             # Update screen
-            for brick in self.bricks:
-                brick.show_brick(self.screen)
-            for paddle_part in self.paddle.hitzones:
-                pygame.draw.rect(self.screen, WHITE, paddle_part[0])
-            for triangle in self.paddle.triangle_views:
-                pygame.draw.polygon(self.screen, WHITE, triangle)
-            for special in self.present_specials:
-                special.fall()
-                special.show_special(self.screen)
-            self.player.draw_lives(self.screen)
-            pygame.draw.rect(self.screen, WHITE, self.ball.form)
-            self.screen.blit(self.font.render(str(self.player.score), -1, WHITE), (400, 550))
+            self.draw_all()
 
-            for button in buttons:
+            if len(self.bricks) == self.number_unbreakable_bricks:
+                self.level_completed()
+
+            """for button in buttons:
                 ui_action = button.update(pygame.mouse.get_pos(), mouse_up)
                 if ui_action is not None:
                     if ui_action.value == -1:
@@ -363,6 +429,5 @@ class Brickbreaker:
                     
                     return ui_action
 
-            buttons.draw(self.screen)
+            buttons.draw(self.screen)"""
 
-            pygame.display.update()
