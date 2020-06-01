@@ -9,7 +9,7 @@ class DatabaseInteract:
         self.cursor = self.connection.cursor()
 
         # Tabelle fuer Settings anlegen
-        createSettings = "CREATE TABLE IF NOT EXISTS settings(setting_id INTEGER PRIMARY KEY, left_button TEXT, left_value TEXT, right_button TEXT, right_value TEXT, pause_button TEXT, pause_value TEXT, difficulty INTEGER, shoot_button TEXT, shoot_value TEXT)"
+        createSettings = "CREATE TABLE IF NOT EXISTS settings(setting_id INTEGER PRIMARY KEY, left_button TEXT, left_value TEXT, right_button TEXT, right_value TEXT, pause_button TEXT, pause_value TEXT, difficulty INTEGER, shoot_button TEXT, shoot_value TEXT, play_music INTEGER)"
         self.cursor.execute(createSettings)
         
         # Tabelle fuer scores anlegen
@@ -21,7 +21,7 @@ class DatabaseInteract:
         self.cursor.execute(createActiveGame)
 
         # default value fuer settings ueberschreibt nicht
-        self.cursor.execute("INSERT OR IGNORE INTO settings VALUES(1, 'a', '97', 'd', '100', 'p', '112', 4, 'Space', '88')")
+        self.cursor.execute("INSERT OR IGNORE INTO settings VALUES(1, 'a', '97', 'd', '100', 'p', '112', 4, 'Space', '88', 1)")
         
         # default value for highscores
         self.cursor.execute("INSERT OR IGNORE INTO highscores VALUES(1, 'Max Mustermann', 0, 0)")
@@ -36,6 +36,11 @@ class DatabaseInteract:
 
         return self.cursor.fetchone()
 
+    def update_play_music(self, play_music):
+        self.cursor.execute(f"UPDATE settings SET play_music = '{play_music}' WHERE setting_id = 1")
+
+        self.connection.commit()
+        
     def update_settings(self, left_button, right_button, pause_button, difficulty):
         self.cursor.execute(f"UPDATE settings SET left_button = '{left_button}',right_button = '{right_button}', pause_button = '{pause_button}', difficulty = {difficulty} WHERE setting_id = 1")
 
