@@ -1,3 +1,8 @@
+"""
+Diese Seite wurde anhand des Tutorials "A Highscore Module for Pygame" erstellt
+Ersteller des Tutorials ist "Pythonian" Forum des Tutorials ist </dream.in.code>
+https://www.dreamincode.net/forums/topic/395940-a-highscore-module-for-pygame/
+"""
 import pygame, sys
 from DatabaseInteract import  DatabaseInteract
 from UIElement import WHITE, BLUE
@@ -14,7 +19,7 @@ def read_from_db_and_find_highscore():
     
     lines = DBI.get_scores()
 
-    high_score = 0
+    high_score = -1
     
     for line in lines:
         name = line[1]
@@ -128,19 +133,19 @@ def enterbox(screen, txt):
         show_name(screen, name)
 
 
-def highscore(screen, file_name, your_points):
+def highscore(screen, your_points):
     high_name, high_score = read_from_db_and_find_highscore()
 
     if your_points > high_score:
-        your_name = enterbox(screen, "YOU HAVE BEATEN THE HIGHSCORE - What is your name?")
+        your_name = enterbox(screen, "Du hast den Highscore geschlagen - Wie heißt du?")
     
     elif your_points == high_score:
-        your_name = enterbox(screen, "YOU HAVE SAME AS HIGHSCORE - What is your name?")
+        your_name = enterbox(screen, "Du hast den Highscore erreicht - Wie heißt du?")
     
     elif your_points < high_score:
-        st1 = "Highscore is "
-        st2 = " made by "
-        st3 = "   What is your name?"
+        st1 = "Highscore ist "
+        st2 = " von "
+        st3 = "   Wie heißt du?"
         txt = st1+str(high_score)+st2+high_name+st3
         your_name = enterbox(screen, txt)
 

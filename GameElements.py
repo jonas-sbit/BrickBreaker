@@ -53,7 +53,20 @@ SPECIAL_HEIGHT = 10
 SPECIAL_COLOR = (135, 135, 135)
 SPECIAL_FALL_SPEED = 2
 SPECIAL_TTL = 10
+PADDLE_SPECIALS = (2, 3, 4, 5)
+SPECIAL_PROBABILITY_DISTRIBUTION = [0.8, 0.2]
+SPECIAL_TYPE_PROBABILITY_DISTRIBUTION = [
+    0.15,
+    0.15,
+    0.15,
+    0.15,
+    0.15,
+    0.15,
+    0.1
+    ]
 
+# Speacial Text Constant
+SPECIAL_TEXT_TTL = 2
 
 class Movement(Enum):
     """ Possible horizontal and vertical movement directions """
@@ -444,8 +457,7 @@ class Special:
         :param screen: the screen to draw the special on
         :return:
         """
-        # TODO: color based on negative positive neutral -> in konstanten festlegen und per if ... in ... entscheiden
-        pygame.draw.rect(screen, SPECIAL_COLOR, self.rect)
+        pygame.draw.rect(screen, self.special_color_picker(), self.rect)
 
     def fall(self):
         """
@@ -461,8 +473,7 @@ class Special:
             - Checks whether the Special is a special changing the paddle's behaviour.
         :return: boolean whether the special changes the paddle's behaviour or not
         """
-        paddle_specials = (2, 3, 4, 5)  #TODO: in Konstante (in diesem file)
-        if self.special_type.value in paddle_specials:
+        if self.special_type.value in PADDLE_SPECIALS:
             return True
         else:
             return False
@@ -486,6 +497,39 @@ class Special:
         self.ttl -= 1
         return self.ttl == 0
 
+    def special_color_picker(self):
+        """
+        description:
+            - Select the color of a Special.
+        :return: color of Special
+        """
+        if self.special_type.value == 0 or self.special_type.value == 3 or self.special_type.value == 4:
+            return (255, 0, 0)
+        elif self.special_type.value == 1 or self.special_type.value == 2 or self.special_type.value == 6:
+            return (0, 255, 0)
+        elif self.special_type.value == 5:
+            return (0, 0, 255)            
+
+class SpecialText:
+    def __init__(self, text, clock_speed):
+        """
+        description:
+            - Create a new object of the SpecialText class.
+        :param text: a string of the text to display
+        :param clock_speed: current clock_speed to determine ttl
+        """
+        self.text = text
+        self.ttl = clock_speed * SPECIAL_TEXT_TTL
+
+    def tick(self):
+        """
+        description:
+            - Decrement object's time to live.
+        :return: boolean whether the ttl was decremented to 0, i.e. is no longer active
+        """
+        self.ttl -= 1
+        return self.ttl == 0
+        
 
 class SpecialType(Enum):
     """ Different specials that can occur during the game. """
@@ -497,6 +541,35 @@ class SpecialType(Enum):
     ACROSS_BORDER = 5
     BONUS_LIFE = 6
 
+    def get_german_name(self):
+        """
+        description:
+            - return the German name of the special type
+        :return: string german name
+        """    
+        german_names = {
+            "FASTER" : "Schneller",
+            "SLOWER" : "Langsamer",
+            "BIGGER_PADDLE" : "Größerer Schläger",
+            "SMALLER_PADDLE" : "Kleinerer Schläger",
+            "CONFUSED_CONTROLS" : "Umgekehrte Steuerung",
+            "ACROSS_BORDER" : "Schengener Abkommen",
+            "BONUS_LIFE" : "Bonus Leben"   
+        }
+        return german_names[self.name]
+
+        
+
+
+class SpecialTypeGerman(Enum):
+    """ Different specials that can occur during the game. """
+    Schneller = 0
+    Langsamer = 1
+    Groesserer_Schlaeger = 2
+    Kleinerer_Schlaeger = 3
+    Umgekehrte_Steuerung = 4
+    Offene_Waende = 5
+    Bonus_Leben = 6
 
 def choose_random_special():
     """
@@ -504,7 +577,7 @@ def choose_random_special():
         - Choose a random special type from all possible types with defined probabilities.
     :return: randomly selected SpecialType-enum value
     """
-    c = choice([    # TODO: TODO: in Konstante (in diesem file)
+    c = choice([
         SpecialType.FASTER,
         SpecialType.SLOWER,
         SpecialType.BIGGER_PADDLE,
@@ -513,15 +586,7 @@ def choose_random_special():
         SpecialType.ACROSS_BORDER,
         SpecialType.BONUS_LIFE],
         1,
-        p=[ # TODO: in Konstante (in diesem file)
-            0.15,
-            0.15,
-            0.15,
-            0.15,
-            0.15,
-            0.15,
-            0.1
-        ]
+        p=SPECIAL_TYPE_PROBABILITY_DISTRIBUTION
     )
     return c[0]
 
@@ -532,5 +597,5 @@ def to_drop_special():
         - Decides whether to drop a special after a brick was destroyed using defined probabilities.
     :return: Boolean whether to drop or not to drop a special
     """
-    c = choice([False, True], 1, p=[0.8, 0.2])  # Hier WSLKT Anpassen falls zu viele / wenige Powerups kommen TODO: in Konstante (in diesem file)
+    c = choice([False, True], 1, p=SPECIAL_PROBABILITY_DISTRIBUTION)  
     return c[0]

@@ -1,6 +1,6 @@
 import pygame
 from pygame.locals import *
-from GameElements import Paddle, Ball, Brick, Special, \
+from GameElements import Paddle, Ball, Brick, Special, SpecialText, \
     SpecialType, to_drop_special, choose_random_special, BOUNCE_OFF_VECTORS
 from Player import Player
 from LevelGenerator import LevelGenerator
@@ -9,6 +9,9 @@ from enum import Enum
 from DatabaseInteract import DatabaseInteract 
 from GameState import GameState
 from Constants import DISPLAY_WIDTH, DISPLAY_HEIGHT, WHITE, BLUE
+from UIElement import TextElement
+from pygame.sprite import RenderUpdates
+from HighscorePage import highscore
 import os
 
 DEFAULT_CLOCK_SPEED = 60
@@ -37,11 +40,11 @@ class Brickbreaker:
         self.ball = Ball()
         self.present_specials = []
         self.active_special = None
+        self.spcl_text = None
 
         pygame.font.init()
         self.font = pygame.font.SysFont("Arial", 25)
-        # TODO: mit schwierigkeitsgrad startleben bestimmen, ggf. stand laden
-        self.player = Player(current_level=6)
+        self.player = Player(current_level=1)
 
     def start_game(self):
         """
@@ -71,6 +74,7 @@ class Brickbreaker:
         sets = dbi.get_settings()
         key_left = int(sets[2])
         key_right = int(sets[4])
+        key_shoot = int(sets[9])
 
         self.ball.center_over_paddle(self.paddle.get_center())
 
@@ -79,8 +83,9 @@ class Brickbreaker:
         clock = pygame.time.Clock()
         vector_selected = False
         while not vector_selected:
-            clock.tick(20)
+            clock.tick(60)
             self.draw_all()
+            self.draw_start_text()
             currently_selected_vector = BOUNCE_OFF_VECTORS[current_index]
             events = pygame.event.get()
             for event in events:
@@ -93,16 +98,18 @@ class Brickbreaker:
                     elif event.key == key_right:
                         if current_index < len(BOUNCE_OFF_VECTORS) - 1:
                             current_index += 1
-                    elif event.key == pygame.K_SPACE:
+                    elif event.key == key_shoot:
                         self.ball.vector = currently_selected_vector
                         vector_selected = True
                         break
+                    elif event.key == pygame.K_ESCAPE:
+                        return GameState.TITLE
 
             vector_indicator_end = (vector_indicator_start[0] + 10 * currently_selected_vector[0],
                                     vector_indicator_start[1] + 10 * currently_selected_vector[1])
             pygame.draw.line(self.screen, WHITE, vector_indicator_start, vector_indicator_end, 3)
 
-            pygame.display.update()
+            pygame.display.flip()
 
     def create_blocks(self):
         """
@@ -110,7 +117,7 @@ class Brickbreaker:
             - Create the bricks for the player's current level using the LevelGenerator-Class
         :return: nothing
         """
-        self.bricks, self.number_unbreakable_bricks = LevelGenerator().create_level(self.player.current_level) # TODO: anpassen
+        self.bricks, self.number_unbreakable_bricks = LevelGenerator().create_level(self.player.current_level) 
 
     def check_ball_collisions(self):
         """
@@ -152,8 +159,8 @@ class Brickbreaker:
         if self.ball.form.y > DISPLAY_HEIGHT:
             self.player.lives -= 1
             if self.player.lives == 0:
-                # TODO: save score
-                self.player.lives = 3 # TODO: an schwierigkeitsgrad anpassen
+                highscore(self.screen, self.player.score)
+                self.player.set_lives()
                 self.player.score = 0
                 self.player.current_level = 1
                 self.start_game()
@@ -277,7 +284,10 @@ class Brickbreaker:
             self.bricks.remove(brick_hit)
             self.player.score += 1
             if to_drop_special():
-                self.present_specials.append(Special(brick_hit.rect.topleft, choose_random_special()))
+                spcl = choose_random_special()
+                txt = spcl.get_german_name()
+                self.spcl_text = SpecialText(txt, self.clock_speed)
+                self.present_specials.append(Special(brick_hit.rect.topleft, spcl))
 
     def check_special_collisions(self):
         """
@@ -338,6 +348,12 @@ class Brickbreaker:
         self.active_special = None
 
     def draw_all(self):
+        """
+        description:
+            - Called every tick
+            - draws screen with every element
+        :return:
+        """
         self.screen.fill(BLUE)
         for brick in self.bricks:
             brick.show_brick(self.screen)
@@ -351,22 +367,88 @@ class Brickbreaker:
         self.player.draw_lives(self.screen)
         pygame.draw.rect(self.screen, WHITE, self.ball.form)
         self.screen.blit(self.font.render(str(self.player.score), -1, WHITE), (400, 550))
-        pygame.display.update()
+
+        self.draw_spcl_txt()
+
+    def draw_spcl_txt(self):
+        if self.spcl_text != None:
+            info = TextElement(
+                center_position=(590, 10),
+                font_size=16,
+                bg_rgb=BLUE,
+                text_rgb=WHITE,
+                text=f"Spezial: {self.spcl_text.text} aufgetaucht",
+                )
+            elems = RenderUpdates(info)
+            elems.draw(self.screen)
+            if self.spcl_text.tick():
+                self.spcl_text = None
+
+        
 
     def level_completed(self):
         """
         description:
             - Called when the player completes a level.
-            - If level 10 was completed: Finish Screen TODO docstring update
+            - If level 10 was completed: show Highscore Page
             - Else: increase level, add bonus life
         :return:
         """
         if self.player.current_level == 10:
-            pass  # TODO: du bist king
+            highscore(self.screen, self.player.score)
+            return GameState.TITLE
         else:
             self.player.current_level += 1
             self.player.lives += 1
             self.start_game()
+
+    def pause_elems(self):
+        """
+        description:
+            - Creates the Text object when being in pause mode
+        :return: elements to be drawn during pause mode
+        """
+        dbi = DatabaseInteract()
+        sets = dbi.get_settings()
+        heading = TextElement(
+            center_position=(400, 400),
+            font_size=18,
+            bg_rgb=BLUE,
+            text_rgb=WHITE,
+            text=f"Spiel Pausiert, zum Fortsetzen '{sets[5]}' drücken, zum Beenden 'ESC' drücken ",
+            )
+        elems = RenderUpdates(heading)
+        return elems
+        
+    def draw_start_text(self):
+        """
+        description:
+            - Creates and draws the Text object when being in pause mode
+        :return: nothing
+        """
+        dbi = DatabaseInteract()
+        sets = dbi.get_settings()
+
+        key_left = sets[1]
+        key_right = sets[3]
+        key_shoot = sets[8]
+
+        heading1 = TextElement(
+            center_position=(400, 400),
+            font_size=18,
+            bg_rgb=BLUE,
+            text_rgb=WHITE,
+            text=f"Startwinkel mit '{key_left}' und '{key_right}' auswählen",
+            )
+        heading2 = TextElement(
+            center_position=(400, 450),
+            font_size=18,
+            bg_rgb=BLUE,
+            text_rgb=WHITE,
+            text=f"Mit '{key_shoot}' Ball abschiessen, zum Beenden 'ESC' drücken ",
+            )
+        elems = RenderUpdates(heading1,heading2)
+        elems.draw(self.screen)
 
     def main(self, buttons):
         # pygame.mouse.set_visible(False)
@@ -379,6 +461,8 @@ class Brickbreaker:
         key_left = sets[2]
         key_right = sets[4]
 
+        pause_key = sets[6]
+        
         while True:
             mouse_up = False
             for event in pygame.event.get():
@@ -390,13 +474,34 @@ class Brickbreaker:
             for event in pygame.event.get():
                 if event.type == QUIT:
                     os._exit(1)
+                if event.type == pygame.KEYDOWN:
+
+                    if event.key == int(pause_key):
+                        elems = self.pause_elems()
+                        #textrect = text.get_rect() 
+                        #textrect.center = (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT // 2)
+                        game_paused = True
+
+                        while game_paused:
+                            elems.draw(self.screen)
+
+                            events = pygame.event.get()
+                            for event in events:
+                                if event.type == QUIT:
+                                    os._exit(1)
+                                if event.type == pygame.KEYDOWN:
+                                    if event.key == int(pause_key):
+                                        game_paused = False
+                                        break
+                                    elif event.key == pygame.K_ESCAPE:
+                                        return GameState.TITLE
+                            pygame.display.update()
+
             keys = pygame.key.get_pressed()
             if keys[int(key_left)]:
                 self.paddle.move(-1)
             if keys[int(key_right)]:
                 self.paddle.move(1)
-            if keys[int(sets[6])]:
-                return GameState.TITLE
             if keys[pygame.K_ESCAPE]:
                 return GameState.TITLE
 
@@ -412,22 +517,12 @@ class Brickbreaker:
 
             # Update screen
             self.draw_all()
+            pygame.display.flip()
 
             if len(self.bricks) == self.number_unbreakable_bricks:
-                self.level_completed()
+                if self.level_completed() == GameState.TITLE:
+                    return GameState.TITLE
+                
 
-            """for button in buttons:
-                ui_action = button.update(pygame.mouse.get_pos(), mouse_up)
-                if ui_action is not None:
-                    if ui_action.value == -1:
-                        pygame.quit()
-                        return 
-                    
-                    #if ui_action.value == 0:
-                        #TODO zuruek zu title screen
-                        #title_screen(pygame.display.set_mode((1000, 750)))
-                    
-                    return ui_action
 
-            buttons.draw(self.screen)"""
 

@@ -1,3 +1,8 @@
+"""
+    Diese Datei wurde anhand des vierteiligen Tutorials von 
+    programmingpixels(https://www.youtube.com/channel/UCA52UIysqTUBT8-D1N8_8KA) 
+    "Tutorial: How to make a title screen and game buttons with pygame" erstellt.
+"""
 import pygame
 import pygame.freetype
 from pygame.sprite import Sprite

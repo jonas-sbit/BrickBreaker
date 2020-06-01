@@ -68,7 +68,7 @@ class Pages():
             font_size=20,
             bg_rgb=BLUE,
             text_rgb=WHITE,
-            text="Return to main menu",
+            text="Zurück zum Hauptmenü",
             action=GameState.TITLE,
         )
 
@@ -99,14 +99,14 @@ class Pages():
             font_size=25,
             bg_rgb=BLUE,
             text_rgb=WHITE,
-            text="Settings",
+            text="Einstellungen",
         )
         return_btn = UIElement(
             center_position=(140, 570),
             font_size=20,
             bg_rgb=BLUE,
             text_rgb=WHITE,
-            text="Return to main menu",
+            text="Zurück zum Hauptmenü",
             action=GameState.TITLE,
         )
 
@@ -128,8 +128,17 @@ class Pages():
             action=GameState.SETTINGS_HIGHLITED_MOVE_RIGHT,
         )     
 
-        do_pause = UIElement(
+        shoot_ball = UIElement(
             center_position=(400, 250),
+            font_size=20,
+            bg_rgb=BLUE,
+            text_rgb=WHITE,
+            text=f"Ball schiessen: {sets[8]}",
+            action=GameState.SETTINGS_HIGHLITED_SHOOT_BALL,
+        )  
+
+        do_pause = UIElement(
+            center_position=(400, 300),
             font_size=20,
             bg_rgb=BLUE,
             text_rgb=WHITE,
@@ -138,7 +147,7 @@ class Pages():
         )    
 
         difficulty = UIElement(
-            center_position=(400, 300),
+            center_position=(400, 350),
             font_size=20,
             bg_rgb=BLUE,
             text_rgb=WHITE,
@@ -146,7 +155,7 @@ class Pages():
             action=GameState.SETTINGS_HIGHLITED_DIFFICULTY,
         )     
 
-        buttons = RenderUpdates(return_btn, move_left, move_right, do_pause, difficulty, heading)
+        buttons = RenderUpdates(return_btn, move_left, move_right, do_pause, difficulty, heading, shoot_ball)
 
         return self.game_loop(screen, buttons, 0)
 
@@ -161,14 +170,14 @@ class Pages():
             font_size=25,
             bg_rgb=BLUE,
             text_rgb=WHITE,
-            text="Settings",
+            text="Einstellungen",
         )
         return_btn = UIElement(
             center_position=(140, 570),
             font_size=20,
             bg_rgb=BLUE,
             text_rgb=WHITE,
-            text="Return to main menu",
+            text="Zurück zum Hauptmenü",
             action=GameState.TITLE,
         )
 
@@ -188,8 +197,16 @@ class Pages():
             text=f"Nach Rechts: {sets[3]}",
         )     
 
-        do_pause = TextElement(
+        shoot_ball = TextElement(
             center_position=(400, 250),
+            font_size=font_size_picker("shoot_ball", highlited_btn),
+            bg_rgb=BLUE,
+            text_rgb=WHITE,
+            text=f"Ball schiessen: {sets[8]}",
+        )  
+
+        do_pause = TextElement(
+            center_position=(400, 300),
             font_size=font_size_picker("do_pause", highlited_btn),
             bg_rgb=BLUE,
             text_rgb=WHITE,
@@ -198,7 +215,7 @@ class Pages():
 
         if highlited_btn !=4 :
             difficulty = TextElement(
-                center_position=(400, 300),
+                center_position=(400, 350),
                 font_size=font_size_picker("difficulty", highlited_btn),
                 bg_rgb=BLUE,
                 text_rgb=WHITE,
@@ -206,7 +223,7 @@ class Pages():
             )
         else:
             difficulty = TextElement(
-                center_position=(400, 300),
+                center_position=(400, 350),
                 font_size=font_size_picker("difficulty", highlited_btn),
                 bg_rgb=BLUE,
                 text_rgb=WHITE,
@@ -214,7 +231,7 @@ class Pages():
             )
 
 
-        buttons = RenderUpdates(return_btn, move_left, move_right, do_pause, difficulty, heading)
+        buttons = RenderUpdates(return_btn, move_left, move_right, do_pause, difficulty, heading, shoot_ball)
 
         return self.game_loop(screen, buttons, highlited_btn * -1)
 
@@ -225,6 +242,7 @@ class Pages():
         dbi = DatabaseInteract()
         sets = dbi.get_settings()
 
+
         while True:
             mouse_up = False
 
@@ -232,9 +250,10 @@ class Pages():
                 for event in pygame.event.get():
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_ESCAPE:
-                            return GameState.SETTINGS                           
+                            return GameState.SETTINGS         
+
                         if level == -1:
-                            if event.key != sets[3] and event.key != sets[5] and event.key != pygame.K_SPACE:
+                            if event.key != int(sets[4]) and event.key != int(sets[6]) and event.key != int(sets[9]):
                                 if event.key == pygame.K_LEFT:
                                     dbi.update_move_left("<-", event.key)
                                 elif event.key == pygame.K_RIGHT:
@@ -243,7 +262,7 @@ class Pages():
                                     dbi.update_move_left(event.unicode, event.key)
 
                         elif level == -2:
-                            if event.key != sets[1] and event.key != sets[5]:
+                            if event.key != int(sets[2]) and event.key != int(sets[6]) and event.key != int(sets[9]):
                                 if event.key == pygame.K_LEFT:
                                     dbi.update_move_right("<-", event.key)
                                 elif event.key == pygame.K_RIGHT:
@@ -252,8 +271,9 @@ class Pages():
                                     dbi.update_move_right(event.unicode, event.key)
 
                         elif level == -3:
-                            if event.key != sets[1] and event.key != sets[3]:
+                            if event.key != int(sets[2]) and event.key != int(sets[4]) and event.key != int(sets[9]):
                                 dbi.update_do_pause(event.unicode, event.key)
+
                         elif level == -4:
                             if event.key == 270 or event.key == 93:
                                 if(sets[7] < MAXIMUM_DIFFICULTY):
@@ -261,6 +281,13 @@ class Pages():
                             elif event.key == 47 or event.key == 269:
                                 if(sets[7] > MINIMUM_DIFFICULTY):
                                     dbi.update_difficulty(sets[7] - 1)
+
+                        elif level == -5:
+                            if event.key != int(sets[2]) and event.key != int(sets[4]) and event.key != int(sets[6]):
+                                if event.key == pygame.K_SPACE:
+                                    dbi.update_shoot_button('Leertaste', event.key)
+                                else:
+                                    dbi.update_shoot_button(event.unicode, event.key)
 
                         return GameState.SETTINGS
 
@@ -315,6 +342,9 @@ class Pages():
         if game_state == GameState.SETTINGS_HIGHLITED_DIFFICULTY:
             game_state = self.settings_page_highlited(screen, player, 4)
 
+        if game_state == GameState.SETTINGS_HIGHLITED_SHOOT_BALL:
+            game_state = self.settings_page_highlited(screen, player, 5)
+
         if game_state == GameState.QUIT:
             game_state = GameState.QUIT
 
@@ -332,6 +362,8 @@ def font_size_picker(button_name, input):
     elif button_name == "do_pause" and input == 3:
         return 20*1.2
     elif button_name == "difficulty" and input == 4:
+        return 20*1.2
+    elif button_name == "shoot_ball" and input == 5:
         return 20*1.2
     else: 
         return 20
