@@ -24,7 +24,12 @@ RED = (255, 0, 0)
 class Pages:
 
     def title_screen(self, screen):
-
+        """
+        description:
+            - Title page
+        :param screen: actual screen
+        :return: result of game_loop
+        """
         start_btn = UIElement(
             center_position=(400, 100),
             font_size=30,
@@ -71,20 +76,26 @@ class Pages:
         return self.game_loop(screen, buttons, 0)
 
     def play_level(self, screen, player):
-        return_btn = UIElement(
-            center_position=(140, 570),
-            font_size=20,
+        quit_btn = UIElement(
+            center_position=(400, 400),
+            font_size=30,
             bg_rgb=BLUE,
             text_rgb=WHITE,
-            text="Zurück zum Hauptmenü",
-            action=GameState.TITLE,
+            text="Beenden",
+            action=GameState.QUIT,
         )
-
-        buttons = RenderUpdates(return_btn)
+        buttons = RenderUpdates(quit_btn)
 
         return self.game_loop(screen, buttons, 1)
 
     def highscore_page(self, screen, player):
+        """
+        description:
+            - Highscore page
+        :param screen: actual screen
+        :param player: player object
+        :return: result of game_loop
+        """        
         font = pygame.font.SysFont("Arial", 16)
 
         my_score = 4
@@ -97,6 +108,13 @@ class Pages:
         return GameState.TITLE
 
     def settings_page(self, screen, player):
+        """
+        description:
+            - Settings page
+        :param screen: actual screen
+        :param player: player object
+        :return: result of game_loop
+        """
         # Datenbank zum auslesen der aktuellen Einstellungen
         dbi = DatabaseInteract()
         sets = dbi.get_settings()
@@ -167,6 +185,14 @@ class Pages:
         return self.game_loop(screen, buttons, 0)
 
     def settings_page_highlited(self, screen, player, highlited_btn):
+        """
+        description:
+            - Settings page
+        :param screen: actual screen
+        :param player: player object
+        :param highlited_btn: selected button 
+        :return: result of game_loop
+        """
         # Datenbank zum auslesen der aktuellen Einstellungen
         # ansicht der Settings seite zum Auswaehlen des Buttons L/R/Pause 
         dbi = DatabaseInteract()
@@ -330,6 +356,14 @@ class Pages:
             pygame.display.flip()
 
     def game_state_logic(self, game_state, screen, player):
+        """
+        description:
+            - Switch between different pages
+        :param screen: the screen to draw the images on
+        :param game_state: next page to be shown
+        :param player: the player object 
+        :return: next GameState
+        """
         if game_state == GameState.TITLE:
             game_state = self.title_screen(screen)
 
@@ -377,6 +411,13 @@ class Pages:
 
 
 def font_size_picker(button_name, input):
+    """
+    description:
+        - Increase font for highlited button
+    :param buttonname: the button to be determined wheter to be bigger or not
+    :param game_state: the button to be highlighted
+    :return: int font size
+    """
     if button_name == "move_left" and input == 1:
         return 20*1.2
     elif button_name == "move_right" and input == 2:
