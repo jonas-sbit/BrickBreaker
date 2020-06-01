@@ -1,4 +1,5 @@
 import pygame
+import os
 from pygame.sprite import RenderUpdates
 from Player import Player
 from UIElement import UIElement, BLUE, WHITE, TextElement
@@ -6,7 +7,12 @@ from DatabaseInteract import DatabaseInteract
 from Brickbreaker import Brickbreaker
 from GameState import GameState
 from HighscorePage import highscore, show_top10
+from numpy.random import choice
 
+CRNT_PATH = os.path.dirname(__file__)
+SOUND_PATH = os.path.join(CRNT_PATH, "soundtrack")
+# Music Copyright (C) by Simon Kiefer and Julian Stein
+SOUNDFILES = ["brick_breaker_ost_1.wav", "brick_breaker_ost_2.wav"]
 
 MAXIMUM_DIFFICULTY = 4
 MINIMUM_DIFFICULTY = 1
@@ -14,7 +20,8 @@ MINIMUM_DIFFICULTY = 1
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
-class Pages():
+
+class Pages:
 
     def title_screen(self, screen):
         start_btn = UIElement(
@@ -87,7 +94,6 @@ class Pages():
         screen.blit(txt_surf, txt_rect)
         pygame.display.flip()
         return GameState.TITLE
-
 
     def settings_page(self, screen, player):
         # Datenbank zum auslesen der aktuellen Einstellungen
@@ -230,7 +236,6 @@ class Pages():
                 text=f"Schwierigkeit: {sets[7]} (mit '+' und '-' anpassen max. 4 min. 1)",
             )
 
-
         buttons = RenderUpdates(return_btn, move_left, move_right, do_pause, difficulty, heading, shoot_ball)
 
         return self.game_loop(screen, buttons, highlited_btn * -1)
@@ -242,8 +247,16 @@ class Pages():
         dbi = DatabaseInteract()
         sets = dbi.get_settings()
 
+        play_music = sets[10] == 1
+        if play_music:
+            track_path = os.path.join(SOUND_PATH, choice(SOUNDFILES, 1, p=[0.5, 0.5])[0])
+            pygame.mixer.music.load(track_path)
+            pygame.mixer.music.play(-1)
+        else:
+            pygame.mixer.music.stop()
 
         while True:
+
             mouse_up = False
 
             if level < 0:
@@ -276,10 +289,10 @@ class Pages():
 
                         elif level == -4:
                             if event.key == 270 or event.key == 93:
-                                if(sets[7] < MAXIMUM_DIFFICULTY):
+                                if sets[7] < MAXIMUM_DIFFICULTY:
                                     dbi.update_difficulty(sets[7] + 1)
                             elif event.key == 47 or event.key == 269:
-                                if(sets[7] > MINIMUM_DIFFICULTY):
+                                if sets[7] > MINIMUM_DIFFICULTY:
                                     dbi.update_difficulty(sets[7] - 1)
 
                         elif level == -5:
@@ -349,10 +362,15 @@ class Pages():
             game_state = GameState.QUIT
 
         if game_state == GameState.PLAY_MUSIC:
-            # TODO Methode fuer musik aufrufen
+            dbi = DatabaseInteract()
+            if pygame.mixer.music.get_busy():
+                dbi.update_play_music(0)
+            else:
+                dbi.update_play_music(1)
             game_state = self.title_screen(screen)
 
         return game_state  
+
 
 def font_size_picker(button_name, input):
     if button_name == "move_left" and input == 1:
@@ -367,4 +385,3 @@ def font_size_picker(button_name, input):
         return 20*1.2
     else: 
         return 20
-    

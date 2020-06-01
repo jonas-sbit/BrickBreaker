@@ -4,11 +4,10 @@ from pages import Pages
 from GameState import GameState
 from Constants import DISPLAY_WIDTH, DISPLAY_HEIGHT
 
-# from GameElements import Special, Random_Show_Special
-
 
 def main():
     pygame.init()
+    pygame.mixer.init()
 
     # Groesse fuer das Fenster festlegen
     screen = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
