@@ -4,15 +4,13 @@ from GameElements import Paddle, Ball, Brick, Special, \
     SpecialType, to_drop_special, choose_random_special, BOUNCE_OFF_VECTORS
 from Player import Player
 from LevelGenerator import LevelGenerator
-from UIElement import WHITE, BLUE
 from GameElements import Movement
 from enum import Enum
 from DatabaseInteract import DatabaseInteract 
 from GameState import GameState
+from Constants import DISPLAY_WIDTH, DISPLAY_HEIGHT, WHITE, BLUE
 import os
 
-DISPLAY_WIDTH = 800
-DISPLAY_HEIGHT = 600
 DEFAULT_CLOCK_SPEED = 60
 CLOCK_SPEED_CHANGE_FACTOR = 1.5
 
@@ -65,8 +63,7 @@ class Brickbreaker:
     def create_blocks(self):
         """
         description:
-            - Create the bricks for the given level using the LevelGenerator-Class
-        :param level: number of the level to create
+            - Create the bricks for the player's current level using the LevelGenerator-Class
         :return: nothing
         """
         self.bricks = LevelGenerator().create_level(self.player.current_level) # TODO: anpassen
@@ -265,7 +262,6 @@ class Brickbreaker:
                     self.present_specials.remove(special)
                     self.active_special = special
                     self.active_special.activate(self.clock_speed)
-                    print(self.active_special.special_type)
                 elif special.rect.top > DISPLAY_HEIGHT:
                     self.present_specials.remove(special)
 

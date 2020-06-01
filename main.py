@@ -2,10 +2,9 @@ import pygame
 from Player import Player
 from pages import Pages
 from GameState import GameState
+from Constants import DISPLAY_WIDTH, DISPLAY_HEIGHT
 # from GameElements import Special, Random_Show_Special
 
-DISPLAY_WIDTH = 800
-DISPLAY_HEIGHT = 600
 
 def main():
     pygame.init()
@@ -30,6 +29,7 @@ def main():
         if game_state == game_state.QUIT:
             pygame.quit()
             return
+
 
 if __name__ == "__main__":
     main()

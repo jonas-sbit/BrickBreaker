@@ -1,14 +1,12 @@
 import pygame
 import os
+from Constants import DISPLAY_WIDTH, DISPLAY_HEIGHT
 
 LIFE_IMG_WIDTH = 17
 LIFE_IMG_HEIGHT = 14
 LIFE_IMG_BOTTOM_MARGIN = 5
 LIFE_IMG_RIGHT_MARGIN = 5
 CRNT_PATH = os.path.dirname(__file__)
-
-DISPLAY_WIDTH = 800
-DISPLAY_HEIGHT = 600
 
 
 class Player:

@@ -2,9 +2,7 @@ import pygame
 import os
 from enum import Enum
 from numpy.random import choice
-
-DISPLAY_WIDTH = 800
-DISPLAY_HEIGHT = 600
+from Constants import DISPLAY_WIDTH, GREY
 
 # Paddle Constants
 BOUNCE_OFF_VECTORS = [(-5, -1), (-4, -2), (-3, -3), (-2, -4), (-1, -5), (1, -5), (2, -4), (3, -3), (4, -2), (5, -1)]
@@ -42,7 +40,7 @@ STD_FORM_BALL = pygame.Rect(315, 490, 5, 5)
 # Brick Constants
 BRICK_WIDTH = 25
 BRICK_HEIGHT = 10
-COLOR_UNBREAKABLE_BRICK = (135, 135, 135)
+COLOR_UNBREAKABLE_BRICK = GREY
 
 CRNT_PATH = os.path.dirname(__file__)  # Where your .py file is located
 BSI_path = os.path.join(CRNT_PATH, 'brick_state_images')  # The Brick State Images folder path
