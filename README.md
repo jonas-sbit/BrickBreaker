@@ -7,7 +7,16 @@ BrickBreaker is a Game where you have to destroy blocks by hitting them with a b
 
 ![Titelseite](Images/Title.png)
 
-![Spielseite](Images/Game.png)
+![Spielseite](Images/level1.png)
+![Spielseite](Images/level2.png)
+![Spielseite](Images/level3.png)
+![Spielseite](Images/level4.png)
+![Spielseite](Images/level5.png)
+![Spielseite](Images/level6.png)
+![Spielseite](Images/level7.png)
+![Spielseite](Images/level8.png)
+![Spielseite](Images/level9.png)
+![Spielseite](Images/level10.png)
 
 ![Einstellungen](Images/settings.png)
 
