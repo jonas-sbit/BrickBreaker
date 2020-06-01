@@ -1,3 +1,6 @@
+"""
+This file contains the player class storing player-related data.
+"""
 import pygame
 import os
 from Constants import DISPLAY_WIDTH, DISPLAY_HEIGHT

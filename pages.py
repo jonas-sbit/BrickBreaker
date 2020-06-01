@@ -24,6 +24,7 @@ RED = (255, 0, 0)
 class Pages:
 
     def title_screen(self, screen):
+
         start_btn = UIElement(
             center_position=(400, 100),
             font_size=30,
@@ -288,10 +289,13 @@ class Pages:
                                 dbi.update_do_pause(event.unicode, event.key)
 
                         elif level == -4:
-                            if event.key == 270 or event.key == 93:
+                            # Change keys depending on OS; this version works for MacOS
+                            # Windows: K_PLUS --> 93, K_KP_PLUS --> 270
+                            if event.key == pygame.K_PLUS or event.key == pygame.K_KP_PLUS:
                                 if sets[7] < MAXIMUM_DIFFICULTY:
                                     dbi.update_difficulty(sets[7] + 1)
-                            elif event.key == 47 or event.key == 269:
+                            # Windows: K_MINUS --> 47, K_KP_MINUS --> 269
+                            elif event.key == pygame.K_MINUS or event.key == pygame.K_KP_MINUS:
                                 if sets[7] > MINIMUM_DIFFICULTY:
                                     dbi.update_difficulty(sets[7] - 1)
 
@@ -321,7 +325,7 @@ class Pages:
             buttons.draw(screen)
 
             if level == 1:
-                return Brickbreaker().main(buttons)
+                return Brickbreaker().main()
 
             pygame.display.flip()
 

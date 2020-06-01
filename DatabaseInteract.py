@@ -1,5 +1,9 @@
-import sqlite3
+"""
+This files handles all database transactions.
+"""
 
+import sqlite3
+import pygame
 
 
 class DatabaseInteract:
@@ -21,7 +25,7 @@ class DatabaseInteract:
         self.cursor.execute(createActiveGame)
 
         # default value fuer settings ueberschreibt nicht
-        self.cursor.execute("INSERT OR IGNORE INTO settings VALUES(1, 'a', '97', 'd', '100', 'p', '112', 4, 'Space', '88', 1)")
+        self.cursor.execute(f"INSERT OR IGNORE INTO settings VALUES(1, 'a', '97', 'd', '100', 'p', '112', 4, 'Space', '{pygame.K_SPACE}', 1)")
         
         # default value for highscores
         self.cursor.execute("INSERT OR IGNORE INTO highscores VALUES(1, 'Max Mustermann', 0, 0)")

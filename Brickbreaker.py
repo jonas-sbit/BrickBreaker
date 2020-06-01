@@ -1,3 +1,6 @@
+"""
+This file contains the fundamental BrickBreaker game logic.
+"""
 import pygame
 from pygame.locals import *
 from GameElements import Paddle, Ball, Brick, Special, SpecialText, \
@@ -19,6 +22,7 @@ CLOCK_SPEED_CHANGE_FACTOR = 1.5
 
 
 class RectSide(Enum):
+    """ Enum indicating different sides of a rectangle """
     TOP = 0
     BOTTOM = 1
     LEFT = 3
@@ -26,12 +30,18 @@ class RectSide(Enum):
 
 
 class CollisionType(Enum):
+    """ Enum indication the possible brick collision types """
     HORIZONTAL = 0
     VERTICAL = 1
 
 
 class Brickbreaker:
     def __init__(self):
+        """
+        description:
+            - Create a new instance of the Brickbreaker class.
+            - Initialize all attributes.
+        """
         self.clock_speed = DEFAULT_CLOCK_SPEED
         self.screen = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
         self.bricks = []
@@ -114,7 +124,7 @@ class Brickbreaker:
     def create_blocks(self):
         """
         description:
-            - Create the bricks for the player's current level using the LevelGenerator-Class
+            - Create the bricks for the player's current level using the LevelGenerator-Class.
         :return: nothing
         """
         self.bricks, self.number_unbreakable_bricks = LevelGenerator().create_level(self.player.current_level) 
@@ -371,7 +381,12 @@ class Brickbreaker:
         self.draw_spcl_txt()
 
     def draw_spcl_txt(self):
-        if self.spcl_text != None:
+        """
+        description:
+            - Write the type of the special that just dropped to the top of the screen.
+        :return: nothing
+        """
+        if self.spcl_text is not None:
             info = TextElement(
                 center_position=(590, 10),
                 font_size=16,
@@ -383,8 +398,6 @@ class Brickbreaker:
             elems.draw(self.screen)
             if self.spcl_text.tick():
                 self.spcl_text = None
-
-        
 
     def level_completed(self):
         """
@@ -450,8 +463,15 @@ class Brickbreaker:
         elems = RenderUpdates(heading1,heading2)
         elems.draw(self.screen)
 
-    def main(self, buttons):
-        # pygame.mouse.set_visible(False)
+    def main(self):
+        """
+        description:
+            - Contains game logic.
+            - Process game events by calling corresponding functions.
+            - Update the UI.
+            - Check whether level was completed.
+        :return: nothing
+        """
         clock = pygame.time.Clock()
         self.start_game()
         
@@ -464,11 +484,6 @@ class Brickbreaker:
         pause_key = sets[6]
         
         while True:
-            mouse_up = False
-            for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                    mouse_up = True
-
             clock.tick(self.clock_speed)
 
             for event in pygame.event.get():
@@ -478,8 +493,6 @@ class Brickbreaker:
 
                     if event.key == int(pause_key):
                         elems = self.pause_elems()
-                        #textrect = text.get_rect() 
-                        #textrect.center = (DISPLAY_WIDTH // 2, DISPLAY_HEIGHT // 2)
                         game_paused = True
 
                         while game_paused:
@@ -505,7 +518,6 @@ class Brickbreaker:
             if keys[pygame.K_ESCAPE]:
                 return GameState.TITLE
 
-
             # update ball
             self.ball.move()
             self.check_ball_collisions()
@@ -522,7 +534,3 @@ class Brickbreaker:
             if len(self.bricks) == self.number_unbreakable_bricks:
                 if self.level_completed() == GameState.TITLE:
                     return GameState.TITLE
-                
-
-
-

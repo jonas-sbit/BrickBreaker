@@ -1,3 +1,7 @@
+"""
+This file contains the object used in the game.
+"""
+
 import pygame
 import os
 from enum import Enum
@@ -77,6 +81,7 @@ class Movement(Enum):
 
 
 class Paddle:
+    """ The paddle used to catch the ball and specials. """
     def __init__(self):
         """
         description:
@@ -319,6 +324,7 @@ class Paddle:
 
 
 class Ball:
+    """ The ball used to destroy bricks """
     def __init__(self):
         """
         description:
@@ -398,6 +404,7 @@ class Ball:
 
 
 class Brick:
+    """ The bricks that have to be destroyed in order to complete the game. """
     brick_state_images = [pygame.image.load(os.path.join(BSI_path, 'brick_state_0.png')),
                           pygame.image.load(os.path.join(BSI_path, 'brick_state_1.png')),
                           pygame.image.load(os.path.join(BSI_path, 'brick_state_2.png')),
@@ -405,10 +412,10 @@ class Brick:
 
     def __init__(self, coordinates, max_hits):
         """
-            description:
-                - creates a new object of the brick class
-            :param max_hits: number of times the brick has to get hit in order to get destroyed; -1 for unbreakable brick
-            :param coordinates: a tuple containing the x- and y-coordinate of the brick's starting point
+        description:
+            - creates a new object of the brick class
+        :param max_hits: number of times the brick has to get hit in order to get destroyed; -1 for unbreakable brick
+        :param coordinates: a tuple containing the x- and y-coordinate of the brick's starting point
         """
         self.rect = pygame.Rect(coordinates[0], coordinates[1], BRICK_WIDTH, BRICK_HEIGHT)
         self.hits_left = max_hits if max_hits <= 4 else 4
@@ -438,7 +445,7 @@ class Brick:
 
 
 class Special:
-
+    """ The specials that can occur during the game changing the default behaviour """
     def __init__(self, start_coordinates, special_type):
         """
         description:
@@ -510,7 +517,9 @@ class Special:
         elif self.special_type.value == 5:
             return (0, 0, 255)            
 
+
 class SpecialText:
+    """ Text displayed at the top of the screen when a special drops. """
     def __init__(self, text, clock_speed):
         """
         description:
@@ -548,28 +557,16 @@ class SpecialType(Enum):
         :return: string german name
         """    
         german_names = {
-            "FASTER" : "Schneller",
-            "SLOWER" : "Langsamer",
-            "BIGGER_PADDLE" : "Größerer Schläger",
-            "SMALLER_PADDLE" : "Kleinerer Schläger",
-            "CONFUSED_CONTROLS" : "Umgekehrte Steuerung",
-            "ACROSS_BORDER" : "Schengener Abkommen",
-            "BONUS_LIFE" : "Bonus Leben"   
+            "FASTER": "Schneller",
+            "SLOWER": "Langsamer",
+            "BIGGER_PADDLE": "Größerer Schläger",
+            "SMALLER_PADDLE": "Kleinerer Schläger",
+            "CONFUSED_CONTROLS": "Umgekehrte Steuerung",
+            "ACROSS_BORDER": "Schengener Abkommen",
+            "BONUS_LIFE": "Bonus Leben"
         }
         return german_names[self.name]
 
-        
-
-
-class SpecialTypeGerman(Enum):
-    """ Different specials that can occur during the game. """
-    Schneller = 0
-    Langsamer = 1
-    Groesserer_Schlaeger = 2
-    Kleinerer_Schlaeger = 3
-    Umgekehrte_Steuerung = 4
-    Offene_Waende = 5
-    Bonus_Leben = 6
 
 def choose_random_special():
     """

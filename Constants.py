@@ -1,3 +1,6 @@
+"""
+File containing constants used in multiple files.
+"""
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 600
 

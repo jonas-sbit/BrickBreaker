@@ -1,10 +1,20 @@
-import pygame
-from GameElements import  Brick
-from DatabaseInteract import  DatabaseInteract
+"""
+This file contains the class for level generation.
+Levels are hardcoded for the in Constants.py defined display dimensions.
+"""
+from GameElements import Brick
+from DatabaseInteract import DatabaseInteract
+
 
 class LevelGenerator():
 
     def create_level(self, level):
+        """
+        description:
+            - generate the blocks for the given level by calling corresponding function.
+        :param level: the level to create
+        :return: tuple consisting of the bricks for the level and the number of unbreakable bricks
+        """
         self.difficulty = DatabaseInteract().get_settings()[7]
         
         switcher = {
@@ -642,4 +652,3 @@ class LevelGenerator():
             y += 12
 
         return blocks 
-         
