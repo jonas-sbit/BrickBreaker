@@ -339,16 +339,18 @@ class Brickbreaker:
                 if self.active_special.tick():
                     self.remove_special()
             self.check_special_collisions()
-            for special in self.present_specials:
-                special.fall()
-                special.show_special(self.screen)
 
+            # Update screen
             for brick in self.bricks:
                 brick.show_brick(self.screen)
             for paddle_part in self.paddle.hitzones:
                 pygame.draw.rect(self.screen, WHITE, paddle_part[0])
             for triangle in self.paddle.triangle_views:
                 pygame.draw.polygon(self.screen, WHITE, triangle)
+            for special in self.present_specials:
+                special.fall()
+                special.show_special(self.screen)
+            self.player.draw_lives(self.screen)
             pygame.draw.rect(self.screen, WHITE, self.ball.form)
             self.screen.blit(self.font.render(str(self.player.score), -1, WHITE), (400, 550))
 
